@@ -1,20 +1,27 @@
 <script lang="ts">
   // Importing sweet alert
-  // import {swal} from "sweetalert"
+  import swal from "sweetalert";
   // Including required dependencies
   import { initializeApp } from "firebase/app";
   // Importing firebase configuration
-  import {config} from "./fbaseconfig.js"
+  import { config } from "./fbaseconfig.js";
   // import { writable } from "svelte/store";
-  import { getAuth, signInWithPopup, GoogleAuthProvider, useDeviceLanguage } from "firebase/auth";
+  import {
+    getAuth,
+    signInWithPopup,
+    GoogleAuthProvider,
+    signOut,
+  } from "firebase/auth";
   // Initilizing the firebase app
   initializeApp(config);
   // Definning Needed Variable
   let isLoged: boolean;
   const provider = new GoogleAuthProvider();
   const auth = getAuth();
-  let profilepic: string
+  let profilepic: string;
   let ExpnadMenucount: number = 0;
+  let name: string;
+  let usrmenu: any = document.getElementsByClassName("usrmenu");
   // Function for authentication
   function gauth() {
     signInWithPopup(auth, provider);
@@ -25,23 +32,39 @@
       isLoged = false;
     } else {
       isLoged = true;
-      profilepic = auth.photoURL
+      profilepic = auth.photoURL;
+      name = auth.displayName;
     }
   });
   // Function to expand user menu
-  const expandUserMenu: () => void =  () => {
-    ExpnadMenucount ++
-    if (ExpnadMenucount %2 !== 0) {
-      document.getElementById("usrmenu").style.height = "230px"    
-      document.getElementsByClassName("usrmenu")[0].style.opacity = "1"
+  const expandUserMenu: () => void = () => {
+    ExpnadMenucount++;
+    if (ExpnadMenucount % 2 !== 0) {
+      document.getElementById("usrmenu").style.height = "230px";
+      usrmenu[0].style.opacity = "1";
     } else {
-      document.getElementById("usrmenu").style.height = "0px"
-      document.getElementsByClassName("usrmenu")[0].style.opacity = "0"
-
-
+      document.getElementById("usrmenu").style.height = "0px";
+      usrmenu[0].style.opacity = "0";
     }
-  }
+  };
+  // Logout function
+  let logout: () => void = () => {
+    swal({
+      title: "Do you really want to logout?",
+      text: "Are you sure that you want to logout?",
+      icon: "warning",
+      dangerMode: true,
+    }).then((willLogout) => {
+      if (willLogout) {
+        signOut(auth).then(() => {
+          expandUserMenu()
+          swal("Loged Out", "You are now successfuly loged out. Log in to use the app", "success");
+        })
+      }
+    });
+  };
 </script>
+
 <!-- Header -->
 <header>
   <nav>
@@ -49,45 +72,70 @@
     <div class="account">
       <!-- Profile Picture -->
       {#if isLoged === false}
-      <button class="login" type="submit" on:click={gauth}>
-        <img src="google.svg" alt="Google" />
-      </button>
+        <button class="login" type="submit" on:click={gauth}>
+          <img src="google.svg" alt="Google" />
+        </button>
       {:else}
-      <button class="profpic" type="submit" on:click={expandUserMenu} >
-        <img src="{profilepic}" alt="URL Pic" />
-      </button>
+        <button class="profpic" type="submit" on:click={expandUserMenu}>
+          <img src={profilepic} alt="URL Pic" />
+        </button>
       {/if}
     </div>
   </nav>
 </header>
 <!-- Main Body -->
-<main>
-  <div class="bg">
-      <!-- User Menu -->
-      <div id="usrmenu">
-        <ul class="usrmenu flex flex-col items-center ma">
-          <li>Yes</li>
-          <li></li>
-          <li></li>
-          <li></li>
-          <li></li>
-        </ul>
+<main class="h-screen w-screen">
+  <!-- User Menu -->
+  <div id="usrmenu">
+    <div class="usrmenu flex flex-col items-center">
+      <span class="font-bold text-lg">Hello {name}</span>
+      <span>
+        <button
+          on:click={gauth}
+          class="logout h-5 w-40
+            text-white rounded-2xl cursor-pointer"
+          type="button">Switch User</button
+        >
+      </span>
+      <span>
+        <button
+          on:click={logout}
+          class="logout bg-red-600 h-10 w-20 font-bold
+          text-white rounded-2xl"
+          type="button">Log Out</button
+        >
+      </span>
     </div>
   </div>
 </main>
 
 <style lang="scss">
-  #usrmenu{
+  #usrmenu {
     height: 0px;
     position: fixed;
     top: 148px;
-    width: clamp(230px,230px,230px);
+    width: clamp(230px, 230px, 230px);
     border-radius: 0px 0px 0px 20px;
-    left:calc(100vw - 230px);
+    left: calc(100vw - 230px);
     transition: 1s height;
-    background-image: linear-gradient(45deg,red,yellow,green,blue,purple,violet);
+    background-image: linear-gradient(
+      45deg,
+      red,
+      yellow,
+      green,
+      blue,
+      purple,
+      violet
+    );
+    span {
+      height: calc(100% / 3);
+      width: 100%;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
   }
-  .usrmenu{
+  .usrmenu {
     color: white;
     background-color: #060606;
     height: calc(100% - 2px);
@@ -105,7 +153,15 @@
     top: 0;
     position: fixed;
     width: 100vw;
-    background-image: linear-gradient(to right,red,yellow,green,blue,purple,violet);
+    background-image: linear-gradient(
+      to right,
+      red,
+      yellow,
+      green,
+      blue,
+      purple,
+      violet
+    );
   }
   nav {
     position: absolute;
@@ -128,21 +184,24 @@
       margin-right: 20px;
     }
   }
-  .login, .profpic {
+  .login,
+  .profpic {
     background-color: transparent;
     border: transparent;
     transition: 0.5s transform;
-    img{
+    img {
       border-radius: 50px;
       aspect-ratio: 1/1;
       height: 70px;
     }
-    &:hover{
+    &:hover {
       cursor: pointer;
     }
   }
-  .login:hover{
+  .login:hover {
     transform: rotate(45deg);
-
+  }
+  main {
+    background-color: #0d0d0d;
   }
 </style>

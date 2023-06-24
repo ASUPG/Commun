@@ -35,6 +35,9 @@
       profilepic = user.photoURL;
       name = user.displayName;
       isNewUser = user.metadata.creationTime === user.metadata.lastSignInTime;
+      if (isNewUser) {
+        document.getElementById("wrapper").innerHTML = ` ${document.getElementById("wrapper").innerHTML} <div class="loginscreen s-b9koqo5Bw7-F"><div class="enter-tag s-b9koqo5Bw7-F"><input type="text" name="" id="tag" placeholder="Enter your Tag Name" class="s-b9koqo5Bw7-F"> <input type="button" value="Done!" class="s-b9koqo5Bw7-F"></div></div>`;
+      }
     }
   });
   // Function to expand user menu
@@ -50,85 +53,82 @@
   };
   // Logout function
   let logout: () => void = async () => {
-    let swal = await import("sweetalert")
-    swal.default({
-      title: "Do you really want to logout?",
-      text: "Are you sure that you want to logout?",
-      icon: "warning",
-      dangerMode: true,
-    }).then((willLogout) => {
-      if (willLogout) {
-        signOut(auth).then(() => {
-          expandUserMenu();
-          swal.default(
-            "Loged Out",
-            "You are now successfuly loged out. Log in to use the app",
-            "success"
-          );
-        });
-      }
-    });
+    let swal = await import("sweetalert");
+    swal
+      .default({
+        title: "Do you really want to logout?",
+        text: "Are you sure that you want to logout?",
+        icon: "warning",
+        dangerMode: true,
+      })
+      .then((willLogout) => {
+        if (willLogout) {
+          signOut(auth).then(() => {
+            expandUserMenu();
+            swal.default(
+              "Loged Out",
+              "You are now successfuly loged out. Log in to use the app",
+              "success"
+            );
+          });
+        }
+      });
   };
 </script>
 
-<!-- Header -->
-<header>
-  <nav>
-    <h1 class="brand-heading">Friends Forever</h1>
-    <div class="account">
-      <!-- Profile Picture -->
-      {#if isLoged === false}
-        <button class="login" type="submit" on:click={gauth}>
-          <img src="google.svg" alt="Google" />
-        </button>
-      {:else}
-        <button class="profpic" type="submit" on:click={expandUserMenu}>
-          <img src={profilepic} alt="URL Pic" />
-        </button>
-      {/if}
-    </div>
-  </nav>
-</header>
-<!-- User Menu -->
-<menu id="usrmenu">
-  <div class="usrmenu flex flex-col items-center">
-    <span class="font-bold text-lg flex justify-center items-center text-center"
-      >Hello {name}</span
-    >
-    <span>
-      <button
-        on:click={gauth}
-        class="logout h-5 w-40
+<div id="wrapper">
+  <!-- Header -->
+  <header>
+    <nav>
+      <h1 class="brand-heading">Friends Forever</h1>
+      <div class="account">
+        <!-- Profile Picture -->
+        {#if isLoged === false}
+          <button class="login" type="submit" on:click={gauth}>
+            <img src="google.svg" alt="Google" />
+          </button>
+        {:else}
+          <button class="profpic" type="submit" on:click={expandUserMenu}>
+            <img src={profilepic} alt="URL Pic" />
+          </button>
+        {/if}
+      </div>
+    </nav>
+  </header>
+  <!-- User Menu -->
+  <menu id="usrmenu">
+    <div class="usrmenu flex flex-col items-center">
+      <span
+        class="font-bold text-lg flex justify-center items-center text-center"
+        >Hello {name}</span
+      >
+      <span>
+        <button
+          on:click={gauth}
+          class="logout h-5 w-40
             text-white rounded-2xl cursor-pointer"
-        type="button">Switch User</button
-      >
-    </span>
-    <span>
-      <button
-        on:click={logout}
-        class="logout bg-red-600 h-10 w-20 font-bold
+          type="button">Switch User</button
+        >
+      </span>
+      <span>
+        <button
+          on:click={logout}
+          class="logout bg-red-600 h-10 w-20 font-bold
           text-white rounded-2xl"
-        type="button">Log Out</button
-      >
-    </span>
-  </div>
-</menu>
-<!-- Login Screen -->
-{#if isNewUser === true}
-<div class="loginscreen">
-  <div class="enter-tag">
-    <input type="text" name="" id="tag" placeholder="Enter your Tag Name">
-    <input type="button" value="Done!">
-  </div>
+          type="button">Log Out</button
+        >
+      </span>
+    </div>
+  </menu>
 </div>
-{/if}
+
 <style lang="scss">
-  @mixin center{
+  @mixin center {
     display: flex;
     align-items: center;
     justify-content: center;
   }
-  .loginscreen{
+  .loginscreen {
     width: 100vw;
     height: 100vh;
     position: absolute;
@@ -136,28 +136,28 @@
     z-index: 100;
     overflow: hidden;
     @include center;
-    .enter-tag{
+    .enter-tag {
       height: 220px;
       background-color: #000000;
       @include center;
       width: 400px;
       border-radius: 50px;
       flex-direction: column;
-      input[type=text]{
+      input[type="text"] {
         background-color: #1c1c1c;
-        color:white;
+        color: white;
         padding-left: 20px;
         height: 50px;
-        width:300px;
+        width: 300px;
         border-radius: 100px;
-        &::placeholder{
-          color:white;
+        &::placeholder {
+          color: white;
         }
         margin-bottom: 20px;
       }
-      input[type=button]{
+      input[type="button"] {
         background-color: #1c1c1c;
-        color:white;
+        color: white;
         width: 100px;
         height: 50px;
         border-radius: 50px;

@@ -1,6 +1,4 @@
 <script lang="ts">
-  // Importing sweet alert
-  import swal from "sweetalert";
   // Including required dependencies
   import { initializeApp } from "firebase/app";
   // Importing firebase configuration
@@ -16,6 +14,7 @@
   initializeApp(config);
   // Definning Needed Variable
   let isLoged: boolean;
+  let isNewUser: boolean;
   const provider = new GoogleAuthProvider();
   const auth = getAuth();
   let profilepic: string;
@@ -28,13 +27,14 @@
     signInWithPopup(auth, provider);
   }
   // Adding onAuthStateChange
-  auth.onAuthStateChanged((auth) => {
-    if (auth === null) {
+  auth.onAuthStateChanged(async (user) => {
+    if (user === null) {
       isLoged = false;
     } else {
       isLoged = true;
-      profilepic = auth.photoURL;
-      name = auth.displayName;
+      profilepic = user.photoURL;
+      name = user.displayName;
+      isNewUser = user.metadata.creationTime === user.metadata.lastSignInTime;
     }
   });
   // Function to expand user menu
@@ -49,8 +49,9 @@
     }
   };
   // Logout function
-  let logout: () => void = () => {
-    swal({
+  let logout: () => void = async () => {
+    let swal = await import("sweetalert")
+    swal.default({
       title: "Do you really want to logout?",
       text: "Are you sure that you want to logout?",
       icon: "warning",
@@ -59,7 +60,7 @@
       if (willLogout) {
         signOut(auth).then(() => {
           expandUserMenu();
-          swal(
+          swal.default(
             "Loged Out",
             "You are now successfuly loged out. Log in to use the app",
             "success"
@@ -112,8 +113,57 @@
     </span>
   </div>
 </menu>
-
+<!-- Login Screen -->
+{#if isNewUser === true}
+<div class="loginscreen">
+  <div class="enter-tag">
+    <input type="text" name="" id="tag" placeholder="Enter your Tag Name">
+    <input type="button" value="Done!">
+  </div>
+</div>
+{/if}
 <style lang="scss">
+  @mixin center{
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .loginscreen{
+    width: 100vw;
+    height: 100vh;
+    position: absolute;
+    background-color: #00000090;
+    z-index: 100;
+    overflow: hidden;
+    @include center;
+    .enter-tag{
+      height: 220px;
+      background-color: #000000;
+      @include center;
+      width: 400px;
+      border-radius: 50px;
+      flex-direction: column;
+      input[type=text]{
+        background-color: #1c1c1c;
+        color:white;
+        padding-left: 20px;
+        height: 50px;
+        width:300px;
+        border-radius: 100px;
+        &::placeholder{
+          color:white;
+        }
+        margin-bottom: 20px;
+      }
+      input[type=button]{
+        background-color: #1c1c1c;
+        color:white;
+        width: 100px;
+        height: 50px;
+        border-radius: 50px;
+      }
+    }
+  }
   #usrmenu {
     height: 0px;
     position: fixed;

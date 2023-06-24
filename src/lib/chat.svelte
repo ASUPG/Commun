@@ -2,28 +2,42 @@
   // Importing Importent Components
   import ExtendButton from "./extendbutton.svelte";
   // Declaring Importent Variables
-  import {isOpen} from "./isOpen"
+  let isOpen = false;
+  let oldIsOpen = isOpen;
+  //Adding logic to open button
+  setInterval(() => {
+    if (isOpen != oldIsOpen) {
+      if (isOpen) {
+        document.getElementById("sidenav").style.transform = "scaleX(1)";
+      } else {
+        document.getElementById("sidenav").style.transform = "scaleX(0)";
+      }
+      oldIsOpen = isOpen;
+    }
+    
+  }, 100);
 </script>
 
-<!-- Side Grouping Menu -->
-<ExtendButton bind:isOpen = {$isOpen} />
-{#if $isOpen == true}
-<div class="sidenav h-screen w-1/3 bg-slate-950" />
-{:else}
-<div class="sidenav h-screen w-0 bg-slate-950" />
-{/if}
+<chatwindows style="display: flex;">
+  <!-- Side Grouping Menu -->
+  <ExtendButton bind:isOpen />
+  <div id="sidenav" class="sidenav h-screen w-1/3 bg-slate-950" />
+</chatwindows>
+
 <style lang="scss">
   .sidenav {
     position: absolute;
     top: 0;
     z-index: 0;
+    transition: 2s all;
+    align-self: flex-start;
   }
   // reponsiveness
   @media only screen and (max-width: 900px) {
     .sidenav {
       left: 48px;
       width: 300px !important;
-      display: none;
+      transform: scaleX(0);
     }
   }
 </style>

@@ -1,79 +1,12 @@
 <script lang="ts">
-  // Including required dependencies
-  import { initializeApp } from "firebase/app";
-  // Importing firebase configuration
-  import { config } from "./../fbaseconfig.js";
-  // import { writable } from "svelte/store";
-  import {
-    getAuth,
-    signInWithPopup,
-    GoogleAuthProvider,
-    signOut,
-  } from "firebase/auth";
-  // Initilizing the firebase app
-  initializeApp(config);
-  // Definning Needed Variable
-  let isLoged: boolean;
-  let isNewUser: boolean;
-  const provider = new GoogleAuthProvider();
-  const auth = getAuth();
-  let profilepic: string;
-  let ExpnadMenucount: number = 0;
-  let name: string;
-  let isOpen: boolean;
-  let usrmenu: any = document.getElementsByClassName("usrmenu");
-  // Function for authentication
-  function gauth() {
-    signInWithPopup(auth, provider);
+  if (document.cookie !== "isLogined=verfor934") {
+    let pass = prompt("Please Enter The Password");
+    if (pass === "fforever") {
+      document.cookie = "isLogined=verfor934";
+    } else {
+      document.getElementsByTagName("body")[0].style.display = "none";
+    }
   }
-  // Adding onAuthStateChange
-  auth.onAuthStateChanged(async (user) => {
-    if (user === null) {
-      isLoged = false;
-    } else {
-      isLoged = true;
-      profilepic = user.photoURL;
-      name = user.displayName;
-      isNewUser = user.metadata.creationTime === user.metadata.lastSignInTime;
-      if (isNewUser) {
-        document.getElementById("wrapper").innerHTML = ` ${document.getElementById("wrapper").innerHTML} <div class="loginscreen s-b9koqo5Bw7-F"><div class="enter-tag s-b9koqo5Bw7-F"><input type="text" name="" id="tag" placeholder="Enter your Tag Name" class="s-b9koqo5Bw7-F"> <input type="button" value="Done!" class="s-b9koqo5Bw7-F"></div></div>`;
-      }
-    }
-  });
-  // Function to expand user menu
-  const expandUserMenu: () => void = () => {
-    ExpnadMenucount++;
-    if (ExpnadMenucount % 2 !== 0) {
-      document.getElementById("usrmenu").style.height = "230px";
-      usrmenu[0].style.opacity = "1";
-    } else {
-      document.getElementById("usrmenu").style.height = "0px";
-      usrmenu[0].style.opacity = "0";
-    }
-  };
-  // Logout function
-  let logout: () => void = async () => {
-    let swal = await import("sweetalert");
-    swal
-      .default({
-        title: "Do you really want to logout?",
-        text: "Are you sure that you want to logout?",
-        icon: "warning",
-        dangerMode: true,
-      })
-      .then((willLogout) => {
-        if (willLogout) {
-          signOut(auth).then(() => {
-            expandUserMenu();
-            swal.default(
-              "Loged Out",
-              "You are now successfuly loged out. Log in to use the app",
-              "success"
-            );
-          });
-        }
-      });
-  };
 </script>
 
 <div id="wrapper">
@@ -81,45 +14,9 @@
   <header>
     <nav>
       <h1 class="brand-heading">Friends Forever</h1>
-      <div class="account">
-        <!-- Profile Picture -->
-        {#if isLoged === false}
-          <button class="login" type="submit" on:click={gauth}>
-            <img src="google.svg" alt="Google" />
-          </button>
-        {:else}
-          <button class="profpic" type="submit" on:click={expandUserMenu}>
-            <img src={profilepic} alt="URL Pic" />
-          </button>
-        {/if}
-      </div>
+      <div class="account" />
     </nav>
   </header>
-  <!-- User Menu -->
-  <menu id="usrmenu">
-    <div class="usrmenu flex flex-col items-center">
-      <span
-        class="font-bold text-lg flex justify-center items-center text-center"
-        >Hello {name}</span
-      >
-      <span>
-        <button
-          on:click={gauth}
-          class="logout h-5 w-40
-            text-white rounded-2xl cursor-pointer"
-          type="button">Switch User</button
-        >
-      </span>
-      <span>
-        <button
-          on:click={logout}
-          class="logout bg-red-600 h-10 w-20 font-bold
-          text-white rounded-2xl"
-          type="button">Log Out</button
-        >
-      </span>
-    </div>
-  </menu>
 </div>
 
 <style lang="scss">

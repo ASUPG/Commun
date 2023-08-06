@@ -23,6 +23,7 @@
   },
   "dependencies": {
     "firebase": "^10.0.0",
+    "svelte-spa-router": "^3.3.0",
     "sweetalert": "^2.1.2"
   }
 }

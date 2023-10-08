@@ -39,12 +39,13 @@
   <header>
     <nav>
       <h1 class="brand-heading">Friends Forever</h1>
-      <div class="account" />
+      <div class="themechanger"><i class="fa-regular fa-circle-half-stroke" style="color: #ffffff;"></i></div>
     </nav>
   </header>
 </div>
 
 <style lang="scss">
+  @import url("./fa/font-awesome.min.css");
   @mixin center {
     display: flex;
     align-items: center;
@@ -83,7 +84,7 @@
       margin-left: 10px;
       font-size: 37px;
     }
-    .account {
+    .themechanger {
       display: flex;
       margin-left: auto;
       margin-right: 20px;

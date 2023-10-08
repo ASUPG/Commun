@@ -5,8 +5,9 @@ body, #app{
     height: 100vh;
     width: 100vw;
     margin: 0;
-    overflow-x: hidden;
+    overflow: hidden;
     font-family: Arial, Helvetica, sans-serif;
+    z-index: -10;
 }
 .groupname {
     color: white;
@@ -23,18 +24,22 @@ body, #app{
     align-items: center;
   }
   .groupicon {
-    width: 65px;
-    height: 65px;
+    width: 60px;
+    height: 60px;
     border-radius: 50px;
   }
   .sidenav {
-    position: absolute;
-    padding-top: 150px;
+    position: relative;
+    padding-top: 0px;
     top: 0;
-    z-index: 0;
+    z-index: 1;
     transition: 2s all;
     width: 30%;
     align-self: flex-start;
+  }
+  .group:hover{
+    background-color: rgb(55, 71, 97) !important;
+    cursor:pointer;
   }
 
 

@@ -2,6 +2,10 @@
   // Importing neccasry components
   import Header from "./lib/header.svelte"
   import Chat from "./lib/chat.svelte"
+  // Registering Service Worker
+  if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.register('/sw.js')
+  }
 </script>
 
 <!-- Header -->

@@ -1,7 +1,10 @@
 <script lang="ts">
   // Importing neccasry components
+  import Rd from "./redirect.svelte"
+  import Router, {location, link} from 'svelte-spa-router'
+  import Pwd from "./pwdasking.svelte"
   import Header from "./lib/header.svelte"
-  import Chat from "./lib/chat.svelte"
+  import Chat from "./chat.svelte"
   import { initializeApp } from "firebase/app";
   import { getFirestore, doc, getDoc } from "firebase/firestore";
   import { config } from "./fbaseconfig";
@@ -14,7 +17,6 @@
   let db = getFirestore(app);
   //Asking Password
   async function askpwd() {
-    document.getElementsByName('body')[0].style.display = 'none';
     let cookietosplit = `|${document.cookie}`;
     let splitedCookie = cookietosplit.split("|");
     if (splitedCookie.length >= 2) {
@@ -45,16 +47,10 @@
   askpwd();
 </script>
 
-<!-- Header -->
-<Header />
-<!-- Main Body -->
-<main class="h-screen w-screen">
-  <!-- Chat Window -->
-  <Chat />
-</main>
+<Router routes={{
+  '/': Rd,
+  '/chat/:group': Chat,
+  "/askpwd": Pwd
+}}/>
 
-<style lang="scss">
-  main {
-    background-color: #0d0d0d;
-  }
-</style>
+

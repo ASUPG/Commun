@@ -1,31 +1,42 @@
 <script lang="ts">
   // Importing Important Components
-  import ExtendButton from "./extendbutton.svelte";
+  export let params;
+  import Header from "./lib/header.svelte";
+  import ExtendButton from "./lib/extendbutton.svelte";
   import { initializeApp } from "firebase/app";
-  import { getFirestore, doc, getDoc } from "firebase/firestore";
-  import { config } from "./../fbaseconfig";
+  import {
+    getFirestore,
+    doc,
+    getDoc,
+    collection,
+    onSnapshot,
+    setDoc,
+    getDocs,
+  } from "firebase/firestore";
+  import { config } from "./fbaseconfig";
   import { getDownloadURL, getStorage, ref } from "firebase/storage";
-  // Declaring Importent Variables
+
+  // Declaring Important Variables
+  let msg = [];
+  let cookietosplit = `|${document.cookie}`;
+  let splitedCookie = cookietosplit.split("|");
+  let username = splitedCookie[2];
+  let html = "";
   let isOpen = false;
   let oldIsOpen = isOpen;
   const storage = getStorage();
   let app = initializeApp(config);
   let db = getFirestore(app);
-  let currentGroup: string = null;
-  //Function to change group
-  function changeGroup(to: string){
-    currentGroup = to;
-    console.log(currentGroup)
-  }
-  changeGroup("Best Friends Forever");
+  let msgamount = 0;
+
   //Funtion to get the logos of the groups
-  function getLogo(logo: string,count : number){
+  function getLogo(logo: string, count: number) {
     //Creating a refrence
-    const pathRefrence = ref(storage, "logos/" + logo)
+    const pathRefrence = ref(storage, "logos/" + logo);
     getDownloadURL(pathRefrence).then((url) => {
       const img = document.getElementById(`logo${count}`);
-      img.setAttribute('src', url);
-    })
+      img.setAttribute("src", url);
+    });
   }
   //Function to Retrieve All the Groups from the database
   async function findGroups() {
@@ -38,12 +49,12 @@
       for (const key in data) {
         newdata.push(data[key]);
         document.getElementById("sidenav").innerHTML += `
-          <button class="group bg-slate-800" onClick="changeGroup(data[key].name)">
+        <a class="group bg-slate-800" href="#/chat/${data[key].name}">
           <img src="" id="logo${count_for_showing_images}" class="groupicon" alt="" />
           <span class="groupname">${data[key].name}</span>
-          </div>
-        `;
-        getLogo(data[key].logo, count_for_showing_images)
+          </a>
+          `;
+        getLogo(data[key].logo, count_for_showing_images);
         count_for_showing_images++;
       }
       return newdata;
@@ -57,7 +68,57 @@
     }
   }
   let groups = findGroups();
-  //Adding logic to open button
+  //Loading All the messages on arrival
+  let msgRef = collection(db, params.group);
+  getDocs(msgRef).then((snap) => {
+    snap.docs.forEach((doc) => {
+      if (username.split("name=")[1] != doc.data().sender) {
+        html += `<div class="msg">
+                  <span class="sender">${doc.data().sender}<br></span>
+                  ${doc.data().msg}
+                  </div>`;
+      } else {
+        html += `<div class="msg sentbyme">
+                  <span class="sender">${doc.data().sender}<br></span>
+                  ${doc.data().msg}
+                  </div>`;
+      }
+    });
+    document.getElementById("seamsg").innerHTML = html;
+    html = "";
+  });
+
+  //Adding logic to open button and Change group
+  if (params != undefined) {
+    let oldGroup = params.group;
+    setInterval(() => {
+      if (params.group != oldGroup) {
+        console.log("yesy");
+        let colRef = collection(db, params.group);
+        onSnapshot(colRef, (snap) => {
+          snap.docs.forEach((doc) => {
+            if (username.split("name=")[1] != doc.data().sender) {
+              html += `<div class="msg">
+                  <span class="sender">${doc.data().sender}<br></span>
+                  ${doc.data().msg}
+                  </div>`;
+            } else {
+              html += `<div class="msg sentbyme">
+                  <span class="sender">${doc.data().sender}<br></span>
+                  ${doc.data().msg}
+                  </div>`;
+            }
+            msg.push({ ...doc.data() });
+          });
+          document.getElementById("seamsg").innerHTML = html;
+          html = "";
+          msgamount = msg.length;
+          msg = [];
+        });
+      }
+      oldGroup = params.group;
+    }, 100);
+  }
   setInterval(() => {
     if (isOpen != oldIsOpen) {
       if (isOpen) {
@@ -69,18 +130,35 @@
       oldIsOpen = isOpen;
     }
   }, 100);
+  //Fuction to send messages
+  async function sendmsg() {
+    const date = new Date();
 
+    let day = date.getDate();
+    let month = date.getMonth() + 1;
+    let year = date.getFullYear();
+    console.log("sent");
+    let msgtosend = document.getElementById("msg").value;
+    await setDoc(doc(db, params.group, `${msgamount + 1}`), {
+      msg: msgtosend,
+      sender: username.split("name=")[1],
+      onsent: `${day}-${month}-${year}`,
+    });
+  }
 </script>
 
+<Header />
 <chatwindows style="display: flex;">
   <!-- Side Grouping Menu -->
   <ExtendButton bind:isOpen />
   <div id="sidenav" class="sidenav h-screen bg-slate-950" />
   <div class="areaformsg" id="areaformsg">
-    <div class="seamsg" />
+    <div class="seamsg" id="seamsg">
+      <div class="msg"><span class="sender">ChatBot<br /></span>Welcome</div>
+    </div>
     <div class="msgarea bg-slate-950">
       <input type="text" class="typemsg" id="msg" />
-      <button class="send" type="button"
+      <button class="send" type="button" on:click={sendmsg}
         ><svg
           xmlns="http://www.w3.org/2000/svg"
           xmlns:xlink="http://www.w3.org/1999/xlink"
@@ -106,24 +184,6 @@
 </chatwindows>
 
 <style lang="scss">
-  .areaformsg {
-    width: 70vw;
-    background-color: black;
-    height: 100vh;
-    position: absolute;
-    z-index: 0;
-    left: 30%;
-  }
-  .msgarea {
-    background-color: hsl(239, 96%, 9%);
-    height: 80px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-  }
-  .seamsg {
-    height: calc(100vh - 230px);
-  }
   .typemsg {
     width: 80%;
     height: 40px;
@@ -137,7 +197,7 @@
   .send {
     height: 50px;
     width: 50px;
-    margin-left:10px;
+    margin-left: 10px;
   }
   // reponsiveness
   @media only screen and (max-width: 900px) {

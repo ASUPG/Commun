@@ -70,7 +70,7 @@
   let groups = findGroups();
   //Loading All the messages on arrival
   let msgRef = collection(db, params.group);
-  getDocs(msgRef).then((snap) => {
+  onSnapshot(msgRef,(snap) => {
     snap.docs.forEach((doc) => {
       if (username.split("name=")[1] != doc.data().sender) {
         html += `<div class="msg">
@@ -108,11 +108,12 @@
                   ${doc.data().msg}
                   </div>`;
             }
-            msg.push({ ...doc.data() });
+            msg.push({ ...doc.data(), id:doc.id });
           });
           document.getElementById("seamsg").innerHTML = html;
           html = "";
-          msgamount = msg.length;
+          msgamount = msg[msg.length -1].id;
+          console.log(msgamount)
           msg = [];
         });
       }
@@ -139,11 +140,18 @@
     let year = date.getFullYear();
     console.log("sent");
     let msgtosend = document.getElementById("msg").value;
-    await setDoc(doc(db, params.group, `${msgamount + 1}`), {
+    if(msgamount%10 == 9){
+      msgamount*=10
+    }else{
+      msgamount+=1
+    }
+    
+    await setDoc(doc(db, params.group, `${msgamount}`), {
       msg: msgtosend,
       sender: username.split("name=")[1],
       onsent: `${day}-${month}-${year}`,
     });
+    msgamount+=2
   }
 </script>
 
@@ -193,6 +201,9 @@
     color: white;
     padding: 10px;
     font-size: 20px;
+    box-shadow:0px 0px 18px #fff,
+               0px 0px 22px #fff,
+               0px 0px 32px rgb(0, 255, 221);
   }
   .send {
     height: 50px;

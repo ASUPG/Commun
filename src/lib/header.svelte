@@ -4,34 +4,6 @@
   import { config } from "./../fbaseconfig";
   let app = initializeApp(config);
   let db = getFirestore(app);
-  async function askpwd() {
-    let cookietosplit = `|${document.cookie}`;
-    let splitedCookie = cookietosplit.split("|");
-    if (splitedCookie.length >= 2) {
-      let islogedin = splitedCookie[1]
-      if (islogedin !== "isLogined=verfor934") {
-        let pass = prompt("Please Enter The Password");
-        if (pass !== "") {
-          let passRef = doc(db, "users", pass);
-          const passSnap = await getDoc(passRef);
-          if (passSnap.exists()) {
-            let name = passSnap.data().name;
-            let cookie = "isLogined=verfor934"
-            document.cookie = cookie;
-            document.cookie += `|name=${name}`
-            document.cookie += `|id=${pass}`
-          } else {
-            askpwd();
-          }
-        } else {
-          askpwd();
-        }
-      }
-    } else {
-      askpwd()
-    }
-  }
-  askpwd();
 </script>
 
 <div id="wrapper">
@@ -39,12 +11,15 @@
   <header>
     <nav>
       <h1 class="brand-heading">Friends Forever</h1>
-      <div class="themechanger"><i class="fa-regular fa-circle-half-stroke" style="color: #ffffff;"></i></div>
+      <div class="themechanger">
+        <i class="fa-regular fa-circle-half-stroke" style="color: #ffffff;" />
+      </div>
     </nav>
   </header>
 </div>
 
 <style lang="scss">
+  @import url('https://fonts.googleapis.com/css2?family=Agbalumo&family=Vibur&display=swap');
   @import url("./fa/font-awesome.min.css");
   @mixin center {
     display: flex;
@@ -83,6 +58,10 @@
     h1 {
       margin-left: 10px;
       font-size: 37px;
+      font-family: "Vibur", sans-serif;
+      color: white;
+      text-shadow: 0 0 13px #fff, 0 0 15px #fff, 0 0 26px #fff, 0 0 43px rgb(0, 247, 255),
+        0 0 87px rgb(0, 255, 234), 0 0 92px #0fa, 0 0 102px #0fa, 0 0 151px #0fa;
     }
     .themechanger {
       display: flex;
@@ -91,5 +70,4 @@
     }
     z-index: 2;
   }
-
 </style>

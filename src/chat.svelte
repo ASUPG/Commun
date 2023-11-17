@@ -17,6 +17,7 @@
   import { getDownloadURL, getStorage, ref } from "firebase/storage";
 
   // Declaring Important Variables
+  let groups
   let msg = [];
   let cookietosplit = `|${document.cookie}`;
   let splitedCookie = cookietosplit.split("|");
@@ -27,7 +28,7 @@
   const storage = getStorage();
   let app = initializeApp(config);
   let db = getFirestore(app);
-  let msgamount = 0;
+  let msgamount: number = 0;
 
   //Funtion to get the logos of the groups
   function getLogo(logo: string, count: number) {
@@ -57,7 +58,7 @@
         getLogo(data[key].logo, count_for_showing_images);
         count_for_showing_images++;
       }
-      return newdata;
+      groups = newdata;
     } else {
       alert(
         "Critical Internal Server File Deleted(Internal Server Error)" + 500
@@ -67,33 +68,61 @@
       );
     }
   }
-  let groups = findGroups();
+findGroups();
   //Loading All the messages on arrival
   let msgRef = collection(db, params.group);
-  onSnapshot(msgRef,(snap) => {
+  onSnapshot(msgRef, (snap) => {
     snap.docs.forEach((doc) => {
       if (username.split("name=")[1] != doc.data().sender) {
         html += `<div class="msg">
-                  <span class="sender">${doc.data().sender}<br></span>
-                  ${doc.data().msg}
-                  </div>`;
+                <span class="sender">${doc.data().sender}<br></span>
+                ${doc.data().msg}
+                </div>`;
       } else {
         html += `<div class="msg sentbyme">
                   <span class="sender">${doc.data().sender}<br></span>
                   ${doc.data().msg}
                   </div>`;
       }
+      msg.push({ ...doc.data(), id: doc.id });
     });
     document.getElementById("seamsg").innerHTML = html;
     html = "";
+    msgamount = parseInt(msg[msg.length - 1].id);
+    msg = [];
   });
+  //Function to Disable Input bar
+  async function disableWriting(grp: Array<any>){
+    let x = grp.length
+    let y = 0
+    while (y !== x){
+      if(grp[y].name == params.group){
+        if(grp[y].availablefor !== "all"){
+          if (grp[y].availablefor.includes(username)){
+            console.log("Includes")
+            document.getElementById("msg").disabled = false
+          }else{
+            console.log("Not Includes")
+            document.getElementById("msg").disabled = true
+          }
+        }else{
+          document.getElementById("msg").disabled = true
+          console.log("Not Includes")
 
+        }
+        break
+      }
+    }
+  }
   //Adding logic to open button and Change group
+  disableWriting(groups)
   if (params != undefined) {
     let oldGroup = params.group;
     setInterval(() => {
       if (params.group != oldGroup) {
+        msg = [];
         console.log("yesy");
+  
         let colRef = collection(db, params.group);
         onSnapshot(colRef, (snap) => {
           snap.docs.forEach((doc) => {
@@ -108,12 +137,11 @@
                   ${doc.data().msg}
                   </div>`;
             }
-            msg.push({ ...doc.data(), id:doc.id });
+            msg.push({ ...doc.data(), id: doc.id });
           });
           document.getElementById("seamsg").innerHTML = html;
           html = "";
-          msgamount = msg[msg.length -1].id;
-          console.log(msgamount)
+          msgamount = parseInt(msg[msg.length - 1].id);
           msg = [];
         });
       }
@@ -140,18 +168,19 @@
     let year = date.getFullYear();
     console.log("sent");
     let msgtosend = document.getElementById("msg").value;
-    if(msgamount%10 == 9){
-      msgamount*=10
-    }else{
-      msgamount+=1
+    if (msgamount % 10 === 9) {
+      console.log(`The value is${msgamount % 10}`);
+      msgamount *= 10;
+    } else {
+      console.log(`The valuex is${msgamount + 1}`);
+      msgamount += 1;
     }
-    
+
     await setDoc(doc(db, params.group, `${msgamount}`), {
       msg: msgtosend,
       sender: username.split("name=")[1],
       onsent: `${day}-${month}-${year}`,
     });
-    msgamount+=2
   }
 </script>
 
@@ -201,9 +230,8 @@
     color: white;
     padding: 10px;
     font-size: 20px;
-    box-shadow:0px 0px 18px #fff,
-               0px 0px 22px #fff,
-               0px 0px 32px rgb(0, 255, 221);
+    box-shadow: 0px 0px 18px #fff, 0px 0px 22px #fff,
+      0px 0px 32px rgb(0, 255, 221);
   }
   .send {
     height: 50px;

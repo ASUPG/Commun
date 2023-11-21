@@ -97,7 +97,6 @@ body, #app{
     display: flex;
     flex-direction: column;
     z-index: -1;
-    overflow-x: hidden;
     overflow-y: scroll;
   }
 

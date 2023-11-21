@@ -16,8 +16,9 @@
   import { config } from "./fbaseconfig";
   import { getDownloadURL, getStorage, ref } from "firebase/storage";
 
+
   // Declaring Important Variables
-  let groups
+  let groups;
   let msg = [];
   let cookietosplit = `|${document.cookie}`;
   let splitedCookie = cookietosplit.split("|");
@@ -30,6 +31,22 @@
   let db = getFirestore(app);
   let msgamount: number = 0;
 
+  //Asking for PWA installation
+  window.addEventListener("beforeinstallprompt",(e)=>{
+    e.preventDefault()
+    let deferredPrompt = e
+    document.getElementById("askcont").style.display = "flex"
+    document.getElementById("asktoinstall").addEventListener("click",(ce) => {
+      deferredPrompt.prompt()
+      deferredPrompt.userChoice.then((choice) => {
+        if(choice.outcome === 'accepted'){
+          console.log('user accepted a2hs prompt')
+        }
+        deferredPrompt = null;
+        document.getElementById("askcont").style.display = "none"
+      })
+    })
+  })
   //Funtion to get the logos of the groups
   function getLogo(logo: string, count: number) {
     //Creating a refrence
@@ -68,9 +85,34 @@
       );
     }
   }
-findGroups();
+  findGroups();
+  //Function to Disable Input bar
+  async function disableWriting(grp: Array<any>) {
+    let x = grp.length;
+    let y = 0;
+    while (y !== x) {
+      console.log("Count", y);
+      if (grp[y].name == params.group) {
+        if (grp[y].availablefor !== "all") {
+          if (grp[y].availablefor.includes(username)) {
+            console.log("Includes");
+            document.getElementById("msg").disabled = false;
+          } else {
+            console.log("Not Includes");
+            document.getElementById("msg").disabled = true;
+          }
+        } else {
+          document.getElementById("msg").disabled = true;
+          console.log("Includes");
+        }
+        break;
+      }
+      y++;
+    }
+  }
   //Loading All the messages on arrival
   let msgRef = collection(db, params.group);
+  disableWriting(groups);
   onSnapshot(msgRef, (snap) => {
     snap.docs.forEach((doc) => {
       if (username.split("name=")[1] != doc.data().sender) {
@@ -91,38 +133,14 @@ findGroups();
     msgamount = parseInt(msg[msg.length - 1].id);
     msg = [];
   });
-  //Function to Disable Input bar
-  async function disableWriting(grp: Array<any>){
-    let x = grp.length
-    let y = 0
-    while (y !== x){
-      if(grp[y].name == params.group){
-        if(grp[y].availablefor !== "all"){
-          if (grp[y].availablefor.includes(username)){
-            console.log("Includes")
-            document.getElementById("msg").disabled = false
-          }else{
-            console.log("Not Includes")
-            document.getElementById("msg").disabled = true
-          }
-        }else{
-          document.getElementById("msg").disabled = true
-          console.log("Not Includes")
-
-        }
-        break
-      }
-    }
-  }
   //Adding logic to open button and Change group
-  disableWriting(groups)
   if (params != undefined) {
     let oldGroup = params.group;
     setInterval(() => {
       if (params.group != oldGroup) {
         msg = [];
         console.log("yesy");
-  
+        disableWriting(groups);
         let colRef = collection(db, params.group);
         onSnapshot(colRef, (snap) => {
           snap.docs.forEach((doc) => {
@@ -183,7 +201,16 @@ findGroups();
     });
   }
 </script>
-
+<div class="container-ask" id="askcont">
+  <div class="border-ask">
+    <div class="box-ask">
+         <span class="text-ask">Please Install to Continue</span>
+            <button type="button" class="ask" id="asktoinstall"><span class="innerText">
+                Install
+            </span></button>
+    </div>
+  </div>
+</div>
 <Header />
 <chatwindows style="display: flex;">
   <!-- Side Grouping Menu -->
@@ -221,6 +248,76 @@ findGroups();
 </chatwindows>
 
 <style lang="scss">
+    .text-ask{
+        color:white;
+        font-family: "Vibur", sans-serif;
+        font-size: x-large;
+        margin-bottom: 20px;
+        text-shadow: 0px 0px 7px #fff,
+                    0px 0px 12px #fff,
+                    0px 0px 15px #fff,
+                    0px 0px 25px rgb(146, 255, 241),
+                    0px 0px 35px rgb(138, 251, 236);
+    }
+    .ask{
+        height: 50px;
+        width:90px;
+        border: white;
+        border-radius: 20px;
+        box-shadow: 0px 0px 7px #fff,
+                    0px 0px 12px #fff,
+                    0px 0px 15px #fff,
+                    0px 0px 25px rgb(146, 255, 241),
+                    0px 0px 45px rgb(138, 251, 236),
+                    0px 0px 7px #fff inset,
+                    0px 0px 12px #fff inset,
+                    0px 0px 15px rgb(138, 251, 236) inset;
+        color:white;
+        text-shadow: 0px 0px 10px #fff,
+                    0px 0px 15px #fff;
+        font-family: "Vibur", sans-serif;;
+    }
+  #askcont {
+    
+    box-sizing: border-box;
+    position: absolute;
+    height: 100vh;
+    width: calc(100vw + 20vw);
+    z-index: 3;
+    display: none;
+    justify-content: center;
+    align-items: center;
+    left:50%;
+    transform: translateX(-50%);
+  }
+  .border-ask {
+    background-image: linear-gradient(
+      to bottom right,
+      red,
+      yellow,
+      green,
+      blue,
+      purple,
+      violet
+    );
+    height: 200px;
+    width:270px;
+    border: 0px ;
+    border-radius: 20px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+  .box-ask{
+    border-radius: 20px;
+    height: 99%;
+    width:99%;
+    background-color: black;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+  }
   .typemsg {
     width: 80%;
     height: 40px;
@@ -247,6 +344,17 @@ findGroups();
     .areaformsg {
       width: calc(100vw - 3rem) !important;
       left: 3rem !important;
+    }
+  }
+  @media only screen and (max-height: 950px) {
+    .msgarea {
+      height: 160px !important;
+    }
+    .send {
+      margin-bottom: 60px;
+    }
+    .typemsg {
+      margin-bottom: 60px;
     }
   }
 </style>

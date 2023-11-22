@@ -3,6 +3,7 @@
   export let params;
   import Header from "./lib/header.svelte";
   import ExtendButton from "./lib/extendbutton.svelte";
+  import Annoucements from "./lib/ann.svelte";
   import { initializeApp } from "firebase/app";
   import {
     getFirestore,
@@ -15,7 +16,6 @@
   } from "firebase/firestore";
   import { config } from "./fbaseconfig";
   import { getDownloadURL, getStorage, ref } from "firebase/storage";
-
 
   // Declaring Important Variables
   let groups;
@@ -30,23 +30,24 @@
   let app = initializeApp(config);
   let db = getFirestore(app);
   let msgamount: number = 0;
-
+  let toshow = false;
+  let announcement = "";
   //Asking for PWA installation
-  window.addEventListener("beforeinstallprompt",(e)=>{
-    e.preventDefault()
-    let deferredPrompt = e
-    document.getElementById("askcont").style.display = "flex"
-    document.getElementById("asktoinstall").addEventListener("click",(ce) => {
-      deferredPrompt.prompt()
+  window.addEventListener("beforeinstallprompt", (e) => {
+    e.preventDefault();
+    let deferredPrompt = e;
+    document.getElementById("askcont").style.display = "flex";
+    document.getElementById("asktoinstall").addEventListener("click", (ce) => {
+      deferredPrompt.prompt();
       deferredPrompt.userChoice.then((choice) => {
-        if(choice.outcome === 'accepted'){
-          console.log('user accepted a2hs prompt')
+        if (choice.outcome === "accepted") {
+          console.log("user accepted a2hs prompt");
         }
         deferredPrompt = null;
-        document.getElementById("askcont").style.display = "none"
-      })
-    })
-  })
+        document.getElementById("askcont").style.display = "none";
+      });
+    });
+  });
   //Funtion to get the logos of the groups
   function getLogo(logo: string, count: number) {
     //Creating a refrence
@@ -86,6 +87,17 @@
     }
   }
   findGroups();
+  //Saving announcements
+  
+  async function Savingannouncements() {
+    let announeref = collection(db, "Announcements");
+    let annSnap = await getDocs(announeref);
+    annSnap.forEach((doc) => {
+      announcement += doc.data().msg
+    });
+    console.log(announcement)
+  }
+  Savingannouncements()
   //Function to Disable Input bar
   async function disableWriting(grp: Array<any>) {
     let x = grp.length;
@@ -201,16 +213,18 @@
     });
   }
 </script>
+
 <div class="container-ask" id="askcont">
   <div class="border-ask">
     <div class="box-ask">
-         <span class="text-ask">Please Install to Continue</span>
-            <button type="button" class="ask" id="asktoinstall"><span class="innerText">
-                Install
-            </span></button>
+      <span class="text-ask">Please Install to Continue</span>
+      <button type="button" class="ask" id="asktoinstall"
+        ><span class="innerText"> Install </span></button
+      >
     </div>
   </div>
 </div>
+<Annoucements content="Welcome" toshow="true" />
 <Header />
 <chatwindows style="display: flex;">
   <!-- Side Grouping Menu -->
@@ -248,37 +262,28 @@
 </chatwindows>
 
 <style lang="scss">
-    .text-ask{
-        color:white;
-        font-family: "Vibur", sans-serif;
-        font-size: x-large;
-        margin-bottom: 20px;
-        text-shadow: 0px 0px 7px #fff,
-                    0px 0px 12px #fff,
-                    0px 0px 15px #fff,
-                    0px 0px 25px rgb(146, 255, 241),
-                    0px 0px 35px rgb(138, 251, 236);
-    }
-    .ask{
-        height: 50px;
-        width:90px;
-        border: white;
-        border-radius: 20px;
-        box-shadow: 0px 0px 7px #fff,
-                    0px 0px 12px #fff,
-                    0px 0px 15px #fff,
-                    0px 0px 25px rgb(146, 255, 241),
-                    0px 0px 45px rgb(138, 251, 236),
-                    0px 0px 7px #fff inset,
-                    0px 0px 12px #fff inset,
-                    0px 0px 15px rgb(138, 251, 236) inset;
-        color:white;
-        text-shadow: 0px 0px 10px #fff,
-                    0px 0px 15px #fff;
-        font-family: "Vibur", sans-serif;;
-    }
+  .text-ask {
+    color: white;
+    font-family: "Vibur", sans-serif;
+    font-size: x-large;
+    margin-bottom: 20px;
+    text-shadow: 0px 0px 7px #fff, 0px 0px 12px #fff, 0px 0px 15px #fff,
+      0px 0px 25px rgb(146, 255, 241), 0px 0px 35px rgb(138, 251, 236);
+  }
+  .ask {
+    height: 50px;
+    width: 90px;
+    border: white;
+    border-radius: 20px;
+    box-shadow: 0px 0px 7px #fff, 0px 0px 12px #fff, 0px 0px 15px #fff,
+      0px 0px 25px rgb(146, 255, 241), 0px 0px 45px rgb(138, 251, 236),
+      0px 0px 7px #fff inset, 0px 0px 12px #fff inset,
+      0px 0px 15px rgb(138, 251, 236) inset;
+    color: white;
+    text-shadow: 0px 0px 10px #fff, 0px 0px 15px #fff;
+    font-family: "Vibur", sans-serif;
+  }
   #askcont {
-    
     box-sizing: border-box;
     position: absolute;
     height: 100vh;
@@ -287,7 +292,7 @@
     display: none;
     justify-content: center;
     align-items: center;
-    left:50%;
+    left: 50%;
     transform: translateX(-50%);
   }
   .border-ask {
@@ -301,17 +306,17 @@
       violet
     );
     height: 200px;
-    width:270px;
-    border: 0px ;
+    width: 270px;
+    border: 0px;
     border-radius: 20px;
     display: flex;
     justify-content: center;
     align-items: center;
   }
-  .box-ask{
+  .box-ask {
     border-radius: 20px;
     height: 99%;
-    width:99%;
+    width: 99%;
     background-color: black;
     display: flex;
     justify-content: center;

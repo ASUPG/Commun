@@ -1,48 +1,28 @@
-"use strict";
-// Cache Name
-const CACHE_NAME = "static-cache-v1";
-// Cache Files
-const FILES_TO_CACHE = ["/offline.html"];
-// install
-self.addEventListener("install", (evt) => {
-  console.log("[ServiceWorker] Install");
-  evt.waitUntil(
-    caches.open(CACHE_NAME).then((cache) => {
-      console.log("[ServiceWorker] Pre-caching offline page");
-      return cache.addAll(FILES_TO_CACHE);
-    })
-  );
-  self.skipWaiting();
-});
-// Active PWA Cache and clear out anything older
-self.addEventListener("activate", (evt) => {
-  console.log("[ServiceWorker] Activate");
-  evt.waitUntil(
-    caches.keys().then((keyList) => {
-      return Promise.all(
-        keyList.map((key) => {
-          if (key !== CACHE_NAME) {
-            console.log("[ServiceWorker] Removing old cache", key);
-            return caches.delete(key);
-          }
-        })
-      );
-    })
-  );
-  self.clients.claim();
-});
-// listen for fetch events in page navigation and return anything that has been cached
-self.addEventListener("fetch", (evt) => {
-  console.log("[ServiceWorker] Fetch", evt.request.url);
-  // when not a navigation event return
-  if (evt.request.mode !== "navigate") {
-    return;
-  }
-  evt.respondWith(
-    fetch(evt.request).catch(() => {
-      return caches.open(CACHE_NAME).then((cache) => {
-        return cache.match("offline.html");
-      });
-    })
-  );
-});
+importScripts('https://storage.googleapis.com/workbox-cdn/releases/6.4.1/workbox-sw.js');
+
+workbox.routing.registerRoute(
+  // Match HTML, CSS, JavaScript, images, and videos
+  ({ url }) => url.pathname.match(/^(.*)\.(html|css|js|png|jpg|gif|svg|mp4|webm|ogg)$/i),
+  new workbox.strategies.NetworkFirst({
+    cacheName: 'network-first-cache',
+  })
+);
+
+// Cache all other resources
+workbox.routing.registerRoute(
+  ({ url }) => !url.pathname.match(/^(.*)\.(html|css|js|png|jpg|gif|svg|mp4|webm|ogg)$/i),
+  new workbox.strategies.CacheOnly({
+    cacheName: 'cache-only-cache',
+  })
+);
+
+// Precache app resources
+workbox.precaching.precacheAndRoute([
+  // List of resources to precache
+  { url: '/', revision: '1' },
+  { url: '/index.html', revision: '1' },
+  { url: '/style.css', revision: '1' },
+  { url: '/app.js', revision: '1' },
+  { url: '/images/logo.png', revision: '1' },
+  { url: '/video.mp4', revision: '1' },
+]);

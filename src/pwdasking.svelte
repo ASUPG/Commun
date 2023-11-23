@@ -13,10 +13,12 @@
           const passSnap = await getDoc(passRef);
           if (passSnap.exists()) {
             let name = passSnap.data().name;
+            let batch = passSnap.data().batch;
             let cookie = "isLogined=verfor934"
             document.cookie = cookie;
             document.cookie += `|name=${name}`
             document.cookie += `|id=${pass}`
+            document.cookie += `|${batch}`
             window.location.href = "/#/"
     }
   }

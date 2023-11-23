@@ -65,6 +65,8 @@ body, #app{
   .sender {
     font-family: "Agbalumo";
     font-size: 20px;
+    display:flex; 
+    align-items: center;
   }
   .sentbyme {
     margin-left: auto !important;

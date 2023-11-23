@@ -16,6 +16,7 @@
   } from "firebase/firestore";
   import { config } from "./fbaseconfig";
   import { getDownloadURL, getStorage, ref } from "firebase/storage";
+  import Ann from "./lib/ann.svelte";
 
   // Declaring Important Variables
   let groups;
@@ -88,16 +89,7 @@
   }
   findGroups();
   //Saving announcements
-  
-  async function Savingannouncements() {
-    let announeref = collection(db, "Announcements");
-    let annSnap = await getDocs(announeref);
-    annSnap.forEach((doc) => {
-      announcement += doc.data().msg
-    });
-    console.log(announcement)
-  }
-  Savingannouncements()
+
   //Function to Disable Input bar
   async function disableWriting(grp: Array<any>) {
     let x = grp.length;
@@ -134,7 +126,7 @@
                 </div>`;
       } else {
         html += `<div class="msg sentbyme">
-                  <span class="sender">${doc.data().sender}<br></span>
+                  <span class="sender">${doc.data().sender} ${doc.data().batch}<br></span>
                   ${doc.data().msg}
                   </div>`;
       }
@@ -210,6 +202,7 @@
       msg: msgtosend,
       sender: username.split("name=")[1],
       onsent: `${day}-${month}-${year}`,
+      batch: splitedCookie[4],
     });
   }
 </script>
@@ -224,7 +217,7 @@
     </div>
   </div>
 </div>
-<Annoucements content="Welcome" toshow="true" />
+
 <Header />
 <chatwindows style="display: flex;">
   <!-- Side Grouping Menu -->
@@ -232,7 +225,7 @@
   <div id="sidenav" class="sidenav h-screen bg-slate-950" />
   <div class="areaformsg" id="areaformsg">
     <div class="seamsg" id="seamsg">
-      <div class="msg"><span class="sender">ChatBot<br /></span>Welcome</div>
+      <div class="msg"><span class="sender">ChatBot <br /></span>Welcome</div>
     </div>
     <div class="msgarea bg-slate-950">
       <input type="text" class="typemsg" id="msg" />
@@ -267,20 +260,31 @@
     font-family: "Vibur", sans-serif;
     font-size: x-large;
     margin-bottom: 20px;
-    text-shadow: 0px 0px 7px #fff, 0px 0px 12px #fff, 0px 0px 15px #fff,
-      0px 0px 25px rgb(146, 255, 241), 0px 0px 35px rgb(138, 251, 236);
+    text-shadow:
+      0px 0px 7px #fff,
+      0px 0px 12px #fff,
+      0px 0px 15px #fff,
+      0px 0px 25px rgb(146, 255, 241),
+      0px 0px 35px rgb(138, 251, 236);
   }
   .ask {
     height: 50px;
     width: 90px;
     border: white;
     border-radius: 20px;
-    box-shadow: 0px 0px 7px #fff, 0px 0px 12px #fff, 0px 0px 15px #fff,
-      0px 0px 25px rgb(146, 255, 241), 0px 0px 45px rgb(138, 251, 236),
-      0px 0px 7px #fff inset, 0px 0px 12px #fff inset,
+    box-shadow:
+      0px 0px 7px #fff,
+      0px 0px 12px #fff,
+      0px 0px 15px #fff,
+      0px 0px 25px rgb(146, 255, 241),
+      0px 0px 45px rgb(138, 251, 236),
+      0px 0px 7px #fff inset,
+      0px 0px 12px #fff inset,
       0px 0px 15px rgb(138, 251, 236) inset;
     color: white;
-    text-shadow: 0px 0px 10px #fff, 0px 0px 15px #fff;
+    text-shadow:
+      0px 0px 10px #fff,
+      0px 0px 15px #fff;
     font-family: "Vibur", sans-serif;
   }
   #askcont {
@@ -332,7 +336,9 @@
     color: white;
     padding: 10px;
     font-size: 20px;
-    box-shadow: 0px 0px 18px #fff, 0px 0px 22px #fff,
+    box-shadow:
+      0px 0px 18px #fff,
+      0px 0px 22px #fff,
       0px 0px 32px rgb(0, 255, 221);
   }
   .send {

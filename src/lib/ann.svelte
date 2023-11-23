@@ -1,6 +1,6 @@
 <script>
     export let content,toshow;
-    if (toshow === false){
+    if (toshow === "false"){
         document.getElementById("ann-border").style.display = "none"
     }
     function close() {

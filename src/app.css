@@ -12,7 +12,7 @@ body, #app{
     --font-color:white;
 }
 .groupname {
-    color: white;
+    color:white;
     font-size: 20px;
     width: 100%;
     display: flex;

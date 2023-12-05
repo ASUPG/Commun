@@ -42,7 +42,7 @@
       deferredPrompt.prompt();
       deferredPrompt.userChoice.then((choice) => {
         if (choice.outcome === "accepted") {
-          console.log("user accepted a2hs prompt");
+          
         }
         deferredPrompt = null;
         document.getElementById("askcont").style.display = "none";
@@ -95,19 +95,15 @@
     let x = grp.length;
     let y = 0;
     while (y !== x) {
-      console.log("Count", y);
       if (grp[y].name == params.group) {
         if (grp[y].availablefor !== "all") {
-          if (grp[y].availablefor.includes(username)) {
-            console.log("Includes");
-            document.getElementById("msg").disabled = false;
+          if (grp[y].availablefor.includes(username.split("name=")[1])) {
+            document.getElementById("ndsemsg").disabled = false;
           } else {
-            console.log("Not Includes");
-            document.getElementById("msg").disabled = true;
+            document.getElementById("sendmsg").disabled = true;
           }
         } else {
-          document.getElementById("msg").disabled = true;
-          console.log("Includes");
+          document.getElementById("sendmsg").disabled = false;
         }
         break;
       }
@@ -121,12 +117,16 @@
     snap.docs.forEach((doc) => {
       if (username.split("name=")[1] != doc.data().sender) {
         html += `<div class="msg">
-                <span class="sender">${doc.data().sender}<br></span>
+                <span class="sender">${doc.data().sender} ${
+                  doc.data().batch
+                }<br></span>
                 ${doc.data().msg}
                 </div>`;
       } else {
         html += `<div class="msg sentbyme">
-                  <span class="sender">${doc.data().sender} ${doc.data().batch}<br></span>
+                  <span class="sender">${doc.data().sender} ${
+                    doc.data().batch
+                  }<br></span>
                   ${doc.data().msg}
                   </div>`;
       }
@@ -143,19 +143,21 @@
     setInterval(() => {
       if (params.group != oldGroup) {
         msg = [];
-        console.log("yesy");
-        disableWriting(groups);
         let colRef = collection(db, params.group);
         onSnapshot(colRef, (snap) => {
           snap.docs.forEach((doc) => {
             if (username.split("name=")[1] != doc.data().sender) {
               html += `<div class="msg">
-                  <span class="sender">${doc.data().sender}<br></span>
-                  ${doc.data().msg}
-                  </div>`;
+                <span class="sender">${doc.data().sender} ${
+                  doc.data().batch
+                }<br></span>
+                ${doc.data().msg}
+                </div>`;
             } else {
               html += `<div class="msg sentbyme">
-                  <span class="sender">${doc.data().sender}<br></span>
+                  <span class="sender">${doc.data().sender} ${
+                    doc.data().batch
+                  }<br></span>
                   ${doc.data().msg}
                   </div>`;
             }
@@ -165,8 +167,11 @@
           html = "";
           msgamount = parseInt(msg[msg.length - 1].id);
           msg = [];
+          var elem = document.getElementById("seamsg");
+          elem.scrollTop = elem.scrollHeight;
         });
       }
+      disableWriting(groups);
       oldGroup = params.group;
     }, 100);
   }
@@ -188,13 +193,12 @@
     let day = date.getDate();
     let month = date.getMonth() + 1;
     let year = date.getFullYear();
-    console.log("sent");
     let msgtosend = document.getElementById("msg").value;
     if (msgamount % 10 === 9) {
-      console.log(`The value is${msgamount % 10}`);
+    
       msgamount *= 10;
     } else {
-      console.log(`The valuex is${msgamount + 1}`);
+      
       msgamount += 1;
     }
 
@@ -229,11 +233,11 @@
     </div>
     <div class="msgarea bg-slate-950">
       <input type="text" class="typemsg" id="msg" />
-      <button class="send" type="button" on:click={sendmsg}
+      <button class="send" id="sendmsg" type="button" on:click={sendmsg}
         ><svg
           xmlns="http://www.w3.org/2000/svg"
           xmlns:xlink="http://www.w3.org/1999/xlink"
-          fill="#fff"
+          fill="currentColor"
           height="25px"
           width="25px"
           version="1.1"
@@ -345,6 +349,10 @@
     height: 50px;
     width: 50px;
     margin-left: 10px;
+    color: #fff;
+    &:disabled {
+      color: rgb(154, 154, 154);
+    }
   }
   // reponsiveness
   @media only screen and (max-width: 900px) {

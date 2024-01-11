@@ -7,6 +7,7 @@
       isOpen = false;
     } else {
       isOpen = true;
+
     }
   }
 </script>

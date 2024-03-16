@@ -88,11 +88,13 @@ body, #app{
     left: 30%;
   }
   .msgarea {
+    padding:0;
     background-color: hsl(239, 96%, 9%);
     height: 160px;
     display: flex;
     align-items: center;
     justify-content: center;
+    padding-bottom: 60px;
   }
   .seamsg {
     height: calc(100vh - 230px);

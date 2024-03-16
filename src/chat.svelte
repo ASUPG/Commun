@@ -20,6 +20,8 @@
   import Ann from "./lib/ann.svelte";
 
   // Declaring Important Variables
+  let issendcontopen = false;
+  let sendcont = "Images";
   let linkopen = "false";
   let groups;
   let msg = [];
@@ -217,7 +219,7 @@
         onsent: `${day}-${month}-${year}`,
         batch: splitedCookie[4],
       });
-    //@ts-ignore
+      //@ts-ignore
 
       document.getElementById("msg").value = "";
     }
@@ -236,8 +238,29 @@
     }
     console.log(linkopen);
   }
+
+  function opensendcnt(content)  {
+    sendcont = content;
+    if ( issendcontopen === false) {
+      document.getElementById("sendovr").style.visibility = "hidden";
+      document.getElementById("sendovr").style.maxHeight = "0";
+
+      issendcontopen = true;
+    } else {
+      document.getElementById("sendovr").style.visibility = "visible";
+      document.getElementById("sendovr").style.maxHeight = "100vh";
+      issendcontopen = false;
+ 
+    }
+  }
 </script>
 
+<div class="sendovr" id="sendovr">
+  <div class="sendui">
+    <h1>Send {sendcont}</h1>
+    <div class="sendinput">Work In Progress</div>
+  </div>
+</div>
 <div class="container-ask" id="askcont">
   <div class="border-ask">
     <div class="box-ask">
@@ -285,25 +308,27 @@
     </div>
     <div class="row" id="r2">
       <div class="item-border">
-        <div class="item" id="img">
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            fill="#42f5ec"
-            style="margin-left: 10px;"
-            viewBox="0 0 24 24"
-            width="30"
-            height="30"
-            ><g id="_01_align_center" data-name="01 align center"
-              ><path
-                d="M21,0H3A3,3,0,0,0,0,3V24H24V3A3,3,0,0,0,21,0ZM3,2H21a1,1,0,0,1,1,1V20.586L11.121,9.707a3,3,0,0,0-4.242,0L2,14.586V3A1,1,0,0,1,3,2ZM2,17.414l6.293-6.293a1,1,0,0,1,1.414,0L20.586,22H2Z"
-              /><path
-                d="M16,10a3,3,0,1,0-3-3A3,3,0,0,0,16,10Zm0-4a1,1,0,1,1-1,1A1,1,0,0,1,16,6Z"
-              /></g
-            ></svg
-          >
+        <button class="linkbtn" id="imagesend" >
+          <div class="item" id="img">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              fill="#42f5ec"
+              style="margin-left: 10px;"
+              viewBox="0 0 24 24"
+              width="30"
+              height="30"
+              ><g id="_01_align_center" data-name="01 align center"
+                ><path
+                  d="M21,0H3A3,3,0,0,0,0,3V24H24V3A3,3,0,0,0,21,0ZM3,2H21a1,1,0,0,1,1,1V20.586L11.121,9.707a3,3,0,0,0-4.242,0L2,14.586V3A1,1,0,0,1,3,2ZM2,17.414l6.293-6.293a1,1,0,0,1,1.414,0L20.586,22H2Z"
+                /><path
+                  d="M16,10a3,3,0,1,0-3-3A3,3,0,0,0,16,10Zm0-4a1,1,0,1,1-1,1A1,1,0,0,1,16,6Z"
+                /></g
+              ></svg
+            >
 
-          <span class="label">Images</span>
-        </div>
+            <span class="label">Images</span>
+          </div></button
+        >
       </div>
     </div>
     <div class="row" id="r3">
@@ -395,6 +420,53 @@
 </chatwindows>
 
 <style lang="scss">
+  .sendui {
+    
+    height: 90vh;
+    width: 80vw;
+    background-color: black;
+    border-radius: 50px;
+    box-shadow:
+      white 0px 0px 15px,
+      white 0px 0px 20px,
+      white 0px 0px 50px,
+      rgb(0, 225, 255) 0px 0px 25px,
+      rgb(0, 255, 255) 0px 0px 45px,
+      rgb(0, 255, 255) 0px 0px 75px,
+      rgb(0, 255, 47) 0px 0px 75px,
+      rgb(0, 26, 255) 0px 0px 75px;
+    color: white;
+    display: grid;
+    grid-column-start: 1;
+    grid-column-end: 1;
+    grid-row-start: 1;
+    grid-row-end: 2;
+    grid-template-rows: 20% 80%;
+    place-items: center;
+    h1 {
+      font-size: 40px;
+    }
+    div {
+      color: rgb(247, 251, 46);
+      font-size: 50px;
+    }
+  }
+  .sendovr {
+    height: 100vh;
+    width: 100vw;
+    position: absolute;
+    background-color: rgba(0, 0, 0, 0.306);
+    z-index: 10;
+    display: grid;
+    place-items: center;
+    visibility: hidden;
+    max-height: 0;
+  }
+  .linkbtn {
+    height: 100%;
+    width: 100%;
+    margin: 0;
+  }
   #r4 {
     .label {
       font-size: 18px;
@@ -544,6 +616,7 @@
     color: white;
     padding: 10px;
     font-size: 20px;
+    margin-top: 0px;
     box-shadow:
       0px 0px 18px #fff,
       0px 0px 22px #fff,

@@ -82,7 +82,7 @@ body, #app{
   .areaformsg {
     width: 70vw;
     background-color: black;
-    height: 100vh;
+    height: calc(100vh - 150px);
     position: absolute;
     z-index: 0;
     left: 30%;
@@ -90,14 +90,14 @@ body, #app{
   .msgarea {
     padding:0;
     background-color: hsl(239, 96%, 9%);
-    height: 160px;
+    height: 70px;
     display: flex;
     align-items: center;
     justify-content: center;
-    padding-bottom: 60px;
+
   }
   .seamsg {
-    height: calc(100vh - 230px);
+    height: calc(100% - 70px);
     display: flex;
     flex-direction: column;
     z-index: -1;

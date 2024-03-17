@@ -642,12 +642,4 @@
       left: 3rem !important;
     }
   }
-  @media only screen and (max-height: 950px) {
-    .send {
-      margin-bottom: 60px;
-    }
-    .typemsg {
-      margin-bottom: 60px;
-    }
-  }
 </style>

@@ -16,10 +16,22 @@
     getDocs,
   } from "firebase/firestore";
   import { config } from "./fbaseconfig";
-  import { getDownloadURL, getStorage, ref, uploadBytes, uploadBytesResumable } from "firebase/storage";
+  import {
+    getDownloadURL,
+    getStorage,
+    ref,
+    uploadBytes,
+    uploadBytesResumable,
+  } from "firebase/storage";
   import Ann from "./lib/ann.svelte";
 
   // Declaring Important Variables
+  let filetext = document.getElementById("filenameupd");
+  let updperct = document.querySelector(".pg");
+  let barpg = document.getElementById("progress-pg");
+  let progress = 0;
+  let filename;
+  let fileitem;
   let issendcontopen = true;
   let sendcont = "Images";
   let linkopen = "false";
@@ -124,7 +136,9 @@
   let msgRef = collection(db, params.group);
   disableWriting(params.group);
   onSnapshot(msgRef, (snap) => {
-    snap.docs.forEach((doc) => {
+    let x = snap.docs.reverse()
+
+    x.forEach((doc) => {
       if (username.split("name=")[1] != doc.data().sender) {
         html += `<div class="msg">
                 <span class="sender">${doc.data().sender} ${
@@ -142,10 +156,12 @@
       }
       msg.push({ ...doc.data(), id: doc.id });
     });
+    msgamount = msg.length;
     document.getElementById("seamsg").innerHTML = html;
     html = "";
-    msgamount = parseInt(msg[msg.length - 1].id);
     msg = [];
+    var elem = document.getElementById("seamsg");
+    elem.scrollTo(0, elem.scrollHeight);
   });
   //Adding logic to open button and Change group
   if (params != undefined) {
@@ -155,7 +171,8 @@
         msg = [];
         let colRef = collection(db, params.group);
         onSnapshot(colRef, (snap) => {
-          snap.docs.forEach((doc) => {
+          let x = snap.docs.reverse()
+          x.forEach((doc) => {
             if (username.split("name=")[1] != doc.data().sender) {
               html += `<div class="msg">
                 <span class="sender">${doc.data().sender} ${
@@ -173,12 +190,13 @@
             }
             msg.push({ ...doc.data(), id: doc.id });
           });
+          msgamount = msg.length;
           document.getElementById("seamsg").innerHTML = html;
           html = "";
-          msgamount = parseInt(msg[msg.length - 1].id);
+
           msg = [];
           var elem = document.getElementById("seamsg");
-          elem.scrollTop = elem.scrollHeight;
+          elem.scrollTo(0, elem.scrollHeight);
         });
       }
       disableWriting(params.group);
@@ -197,12 +215,12 @@
     }
   }, 100);
   //Fuction to send messages
-  async function sendmsg(){
+  async function sendmsg() {
     //@ts-ignore
     let msgtosend = document.getElementById("msg").value;
-    sendmsgwtype("Text","",msgtosend)
+    sendmsgwtype("Text", "", msgtosend);
   }
-  async function sendmsgwtype(type,durl,msgtosend) {
+  async function sendmsgwtype(type, durl, msgtosend) {
     if (msgtosend != "") {
       const date = new Date();
 
@@ -210,19 +228,14 @@
       let month = date.getMonth() + 1;
       let year = date.getFullYear();
       // @ts-ignore
-      if (msgamount % 10 === 9) {
-        msgamount *= 10;
-      } else {
-        msgamount += 1;
-      }
-
-      await setDoc(doc(db, params.group, `${msgamount}`), {
+      let msgid = 99999999999999 - msgamount
+      await setDoc(doc(db, params.group, `${msgid}`), {
         msg: msgtosend,
         sender: username.split("name=")[1],
         onsent: `${day}-${month}-${year}`,
         batch: splitedCookie[4],
-        type:type,
-        durl:durl
+        type: type,
+        durl: durl,
       });
       //@ts-ignore
 
@@ -250,7 +263,6 @@
       document.getElementById("sendovr").style.visibility = "hidden";
       document.getElementById("sendovr").style.transform = "scale(0)";
 
-
       issendcontopen = true;
     } else {
       document.getElementById("sendovr").style.visibility = "visible";
@@ -259,38 +271,39 @@
     }
   };
   let closecntsend = () => {
-    
     document.getElementById("sendovr").style.visibility = "hidden";
     document.getElementById("sendovr").style.transform = "scale(0)";
 
-      issendcontopen = true;
-  }
-  let filetext = document.getElementById("filenameupd")
-  let updperct = document.querySelector(".pg")
-  let barpg = document.getElementById("progress-pg")
-  let progress = 0;
-  let filename;
-  let fileitem;
-  function getFiles(){
-    let finp = document.getElementById("fileupd")
+    issendcontopen = true;
+  };
+  function getFiles() {
+    let finp = document.getElementById("fileupd");
     //@ts-ignore
-    let file = finp.files[0]
-    filename = file.name
-    fileitem = file
-    document.getElementById("filenameupd").innerHTML = filename
+    let file = finp.files[0];
+    filename = file.name;
+    fileitem = file;
+    document.getElementById("filenameupd").innerHTML = filename;
   }
   let uploadfile = async () => {
-    let storageRef = ref(storage, "files/"+filename)
-    let updtask = uploadBytesResumable(storageRef, fileitem)
-    updtask.on('state_changed', (snapshot) => {
-      let prg =  (snapshot.bytesTransferred / snapshot.totalBytes) * 100
-      progress = Math.trunc(prg)
-
-    })
-    const imageUrl = await getDownloadURL(updtask.snapshot.ref)
-    sendmsgwtype(sendcont,imageUrl,`<img src="${imageUrl}">`)
-    
-  }
+    let refofmd = doc(db,"metadata","storage")
+    let snapofmd = await getDoc(refofmd)
+    if (snapofmd.exists()){
+      let n = snapofmd.data().total
+      let storageRef = ref(storage, "files/" + n);
+      let updtask = uploadBytesResumable(storageRef, fileitem);
+      updtask.on("state_changed", (snapshot) => {
+        let prg = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
+        progress = Math.trunc(prg);
+      });
+      const imageUrl = await getDownloadURL(updtask.snapshot.ref);
+      sendmsgwtype(sendcont, imageUrl, `<img src="${imageUrl}">`);
+      await setDoc(refofmd,{
+        total:n+1
+      })
+    }else{
+      alert("A major error has occurd. Please inform the developer of the app")
+    }
+  };
 </script>
 
 <div class="sendovr" id="sendovr">
@@ -299,27 +312,101 @@
       <div class="x"></div>
       <div class="x"></div>
       <button class="cut" on:click={closecntsend}>
-        <svg xmlns="http://www.w3.org/2000/svg" x="0px" y="0px" width="50" height="50" viewBox="0,0,256,256">
-          <defs><linearGradient x1="32" y1="5" x2="32" y2="59.134" gradientUnits="userSpaceOnUse" id="color-1_43980_gr1"><stop offset="0" stop-color="#12ff00"></stop><stop offset="1" stop-color="#00f0ff"></stop></linearGradient><linearGradient x1="32" y1="5" x2="32" y2="59.134" gradientUnits="userSpaceOnUse" id="color-2_43980_gr2"><stop offset="0" stop-color="#12ff00"></stop><stop offset="1" stop-color="#00f0ff"></stop></linearGradient><linearGradient x1="32" y1="20.833" x2="32" y2="42.698" gradientUnits="userSpaceOnUse" id="color-3_43980_gr3"><stop offset="0" stop-color="#00e8ff"></stop><stop offset="1" stop-color="#00ff32"></stop></linearGradient></defs><g fill="none" fill-rule="nonzero" stroke="none" stroke-width="1" stroke-linecap="butt" stroke-linejoin="miter" stroke-miterlimit="10" stroke-dasharray="" stroke-dashoffset="0" font-family="none" font-weight="none" font-size="none" text-anchor="none" style="mix-blend-mode: normal"><g transform="scale(4,4)"><path d="M32,58c-14.337,0 -26,-11.663 -26,-26c0,-14.337 11.663,-26 26,-26c14.337,0 26,11.663 26,26c0,14.337 -11.663,26 -26,26zM32,8c-13.233,0 -24,10.767 -24,24c0,13.233 10.767,24 24,24c13.233,0 24,-10.767 24,-24c0,-13.233 -10.767,-24 -24,-24z" fill="url(#color-1_43980_gr1)"></path><path d="M32,52c-11.028,0 -20,-8.972 -20,-20c0,-11.028 8.972,-20 20,-20c11.028,0 20,8.972 20,20c0,11.028 -8.972,20 -20,20zM32,14c-9.925,0 -18,8.075 -18,18c0,9.925 8.075,18 18,18c9.925,0 18,-8.075 18,-18c0,-9.925 -8.075,-18 -18,-18z" fill="url(#color-2_43980_gr2)"></path><path d="M40.692,24.724l-1.417,-1.417c-0.41,-0.41 -1.076,-0.41 -1.486,0l-5.789,5.79l-5.789,-5.789c-0.41,-0.41 -1.076,-0.41 -1.486,0l-1.417,1.417c-0.41,0.41 -0.41,1.076 0,1.486l5.789,5.789l-5.789,5.789c-0.41,0.41 -0.41,1.076 0,1.486l1.417,1.417c0.41,0.41 1.076,0.41 1.486,0l5.789,-5.789l5.789,5.789c0.41,0.41 1.076,0.41 1.486,0l1.417,-1.417c0.41,-0.41 0.41,-1.076 0,-1.486l-5.789,-5.789l5.789,-5.789c0.411,-0.411 0.411,-1.076 0,-1.487z" fill="url(#color-3_43980_gr3)"></path></g></g>
-          </svg>
-        </button>
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          x="0px"
+          y="0px"
+          width="50"
+          height="50"
+          viewBox="0,0,256,256"
+        >
+          <defs
+            ><linearGradient
+              x1="32"
+              y1="5"
+              x2="32"
+              y2="59.134"
+              gradientUnits="userSpaceOnUse"
+              id="color-1_43980_gr1"
+              ><stop offset="0" stop-color="#12ff00"></stop><stop
+                offset="1"
+                stop-color="#00f0ff"
+              ></stop></linearGradient
+            ><linearGradient
+              x1="32"
+              y1="5"
+              x2="32"
+              y2="59.134"
+              gradientUnits="userSpaceOnUse"
+              id="color-2_43980_gr2"
+              ><stop offset="0" stop-color="#12ff00"></stop><stop
+                offset="1"
+                stop-color="#00f0ff"
+              ></stop></linearGradient
+            ><linearGradient
+              x1="32"
+              y1="20.833"
+              x2="32"
+              y2="42.698"
+              gradientUnits="userSpaceOnUse"
+              id="color-3_43980_gr3"
+              ><stop offset="0" stop-color="#00e8ff"></stop><stop
+                offset="1"
+                stop-color="#00ff32"
+              ></stop></linearGradient
+            ></defs
+          ><g
+            fill="none"
+            fill-rule="nonzero"
+            stroke="none"
+            stroke-width="1"
+            stroke-linecap="butt"
+            stroke-linejoin="miter"
+            stroke-miterlimit="10"
+            stroke-dasharray=""
+            stroke-dashoffset="0"
+            font-family="none"
+            font-weight="none"
+            font-size="none"
+            text-anchor="none"
+            style="mix-blend-mode: normal"
+            ><g transform="scale(4,4)"
+              ><path
+                d="M32,58c-14.337,0 -26,-11.663 -26,-26c0,-14.337 11.663,-26 26,-26c14.337,0 26,11.663 26,26c0,14.337 -11.663,26 -26,26zM32,8c-13.233,0 -24,10.767 -24,24c0,13.233 10.767,24 24,24c13.233,0 24,-10.767 24,-24c0,-13.233 -10.767,-24 -24,-24z"
+                fill="url(#color-1_43980_gr1)"
+              ></path><path
+                d="M32,52c-11.028,0 -20,-8.972 -20,-20c0,-11.028 8.972,-20 20,-20c11.028,0 20,8.972 20,20c0,11.028 -8.972,20 -20,20zM32,14c-9.925,0 -18,8.075 -18,18c0,9.925 8.075,18 18,18c9.925,0 18,-8.075 18,-18c0,-9.925 -8.075,-18 -18,-18z"
+                fill="url(#color-2_43980_gr2)"
+              ></path><path
+                d="M40.692,24.724l-1.417,-1.417c-0.41,-0.41 -1.076,-0.41 -1.486,0l-5.789,5.79l-5.789,-5.789c-0.41,-0.41 -1.076,-0.41 -1.486,0l-1.417,1.417c-0.41,0.41 -0.41,1.076 0,1.486l5.789,5.789l-5.789,5.789c-0.41,0.41 -0.41,1.076 0,1.486l1.417,1.417c0.41,0.41 1.076,0.41 1.486,0l5.789,-5.789l5.789,5.789c0.41,0.41 1.076,0.41 1.486,0l1.417,-1.417c0.41,-0.41 0.41,-1.076 0,-1.486l-5.789,-5.789l5.789,-5.789c0.411,-0.411 0.411,-1.076 0,-1.487z"
+                fill="url(#color-3_43980_gr3)"
+              ></path></g
+            ></g
+          >
+        </svg>
+      </button>
       <div class="x"></div>
       <h1>Send {sendcont}</h1>
       <div class="x"></div>
       <div class="x"></div>
       <div class="x"></div>
       <div class="x"></div>
-
     </div>
     <div class="sendinput">
-      <input type="file" name="" id="fileupd" on:change={getFiles}>
+      <input type="file" name="" id="fileupd" on:change={getFiles} />
       <label for="fileupd" class="fileupdbtn">+</label>
       <span id="filenameupd"></span>
       <div class="pg-bar">
-        <div class="progress-pg" id="progress-pg" style="width:{progress}%"></div>
+        <div
+          class="progress-pg"
+          id="progress-pg"
+          style="width:{progress}%"
+        ></div>
       </div>
       <div class="pg">{progress}%</div>
-      <button class="uploadbtn" id="updbtn" on:click={uploadfile}>Upload {sendcont}</button>
+      <button class="uploadbtn" id="updbtn" on:click={uploadfile}
+        >Upload {sendcont}</button
+      >
     </div>
   </div>
 </div>
@@ -482,22 +569,22 @@
 </chatwindows>
 
 <style lang="scss">
-  .cut{
-   margin-top: auto; 
-    margin-left: auto; 
+  .cut {
+    margin-top: auto;
+    margin-left: auto;
     height: 100%;
     aspect-ratio: 1/1;
     margin-top: 20px;
     margin-right: 20px;
   }
-  .so2{
+  .so2 {
     height: 100%;
-    width:100%;
+    width: 100%;
     align-items: center;
     justify-content: center;
     grid-template-columns: 20% 60% 20%;
     grid-template-rows: 20% 60% 20%;
-    h1{
+    h1 {
       display: flex;
       width: 100%;
       align-items: center;

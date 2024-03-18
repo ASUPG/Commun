@@ -270,11 +270,13 @@
       issendcontopen = false;
     }
   };
-  let closecntsend = () => {
+  function closecntsend () {
     document.getElementById("sendovr").style.visibility = "hidden";
     document.getElementById("sendovr").style.transform = "scale(0)";
-
     issendcontopen = true;
+    filetext.innerHTML = "";
+    updperct.innerHTML = "0%"
+    barpg.style.width = "0%";
   };
   function getFiles() {
     let finp = document.getElementById("fileupd");
@@ -291,15 +293,17 @@
       let n = snapofmd.data().total
       let storageRef = ref(storage, "files/" + n);
       let updtask = uploadBytesResumable(storageRef, fileitem);
+      let imageUrl = await getDownloadURL(updtask.snapshot.ref);
+      alert(imageUrl)
+      await sendmsgwtype(sendcont, imageUrl, `<img src="${imageUrl}">`);
+      await setDoc(refofmd,{
+        total:n+1
+      }) 
+      imageUrl = ""
       updtask.on("state_changed", (snapshot) => {
         let prg = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
         progress = Math.trunc(prg);
       });
-      const imageUrl = await getDownloadURL(updtask.snapshot.ref);
-      sendmsgwtype(sendcont, imageUrl, `<img src="${imageUrl}">`);
-      await setDoc(refofmd,{
-        total:n+1
-      })
     }else{
       alert("A major error has occurd. Please inform the developer of the app")
     }

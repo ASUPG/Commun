@@ -293,17 +293,28 @@
       let n = snapofmd.data().total
       let storageRef = ref(storage, "files/" + n);
       let updtask = uploadBytesResumable(storageRef, fileitem);
-      let imageUrl = await getDownloadURL(updtask.snapshot.ref);
-      alert(imageUrl)
-      await sendmsgwtype(sendcont, imageUrl, `<img src="${imageUrl}">`);
-      await setDoc(refofmd,{
-        total:n+1
-      }) 
-      imageUrl = ""
-      updtask.on("state_changed", (snapshot) => {
-        let prg = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
-        progress = Math.trunc(prg);
-      });
+      updtask.on('state_changed', 
+  (snapshot) => {
+    // Observe state change events such as progress, pause, and resume
+    // Get task progress, including the number of bytes uploaded and the total number of bytes to be uploaded
+    let prg = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
+    progress = Math.trunc(prg);
+  }, 
+  (error) => {
+    alert("An error Occured while uploading: " + error.message + "With code of" + error.code + "Caused by " + error.cause)
+  }, 
+  () => {
+    // Handle successful uploads on complete
+    // For instance, get the download URL: https://firebasestorage.googleapis.com/...
+    getDownloadURL(updtask.snapshot.ref).then((url) => {
+      alert(url)
+       sendmsgwtype(sendcont, url, `<img src="${url}">`);
+
+    });
+    setDoc(refofmd,{
+      total:n+1
+    }) 
+    });
     }else{
       alert("A major error has occurd. Please inform the developer of the app")
     }

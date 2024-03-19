@@ -323,7 +323,7 @@
       alert("A major error has occurd. Please inform the developer of the app")
     }
   };
-
+</script>
 <div class="sendovr" id="sendovr">
   <div class="sendui">
     <div class="grid so2">

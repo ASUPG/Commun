@@ -43,7 +43,6 @@ body, #app{
     background-color: rgb(55, 71, 97) !important;
     cursor:pointer;
   }
-  
   .msg {
     width: 2.5in;
     background-color:rgb(227, 149, 4);

@@ -24,6 +24,7 @@
     uploadBytesResumable,
   } from "firebase/storage";
   import Ann from "./lib/ann.svelte";
+  import { getMessaging, getToken } from "firebase/messaging";
 
   // Declaring Important Variables
   let filetext = document.getElementById("filenameupd");
@@ -242,6 +243,7 @@
       document.getElementById("msg").value = "";
     }
   }
+  //Function to Open The area of send options
   function openLink() {
     if (linkopen === "false") {
       document.getElementById("linkcont").style.height = "40%";
@@ -256,7 +258,7 @@
     }
     console.log(linkopen);
   }
-
+  //Function to open the send files container
   let opensendcntimg = () => {
     sendcont = "Image";
     if (issendcontopen === false) {
@@ -270,6 +272,7 @@
       issendcontopen = false;
     }
   };
+  //Function to close the send files container
   function closecntsend () {
     document.getElementById("sendovr").style.visibility = "hidden";
     document.getElementById("sendovr").style.transform = "scale(0)";
@@ -278,6 +281,7 @@
     updperct.innerHTML = "0%"
     barpg.style.width = "0%";
   };
+  //Function that runs on the onchange of input to keep information up-to-date
   function getFiles() {
     let finp = document.getElementById("fileupd");
     //@ts-ignore
@@ -286,6 +290,7 @@
     fileitem = file;
     document.getElementById("filenameupd").innerHTML = filename;
   }
+  //function to upload the files
   let uploadfile = async () => {
     let refofmd = doc(db,"metadata","storage")
     let snapofmd = await getDoc(refofmd)
@@ -307,7 +312,6 @@
     // Handle successful uploads on complete
     // For instance, get the download URL: https://firebasestorage.googleapis.com/...
     getDownloadURL(updtask.snapshot.ref).then((url) => {
-      alert(url)
        sendmsgwtype(sendcont, url, `<img src="${url}">`);
 
     });
@@ -319,7 +323,6 @@
       alert("A major error has occurd. Please inform the developer of the app")
     }
   };
-</script>
 
 <div class="sendovr" id="sendovr">
   <div class="sendui">

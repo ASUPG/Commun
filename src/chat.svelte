@@ -218,6 +218,7 @@
   //Fuction to send messages
   async function sendmsg() {
     //@ts-ignore
+    
     let msgtosend = document.getElementById("msg").value;
     sendmsgwtype("Text", "", msgtosend);
   }

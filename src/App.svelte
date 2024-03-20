@@ -8,6 +8,7 @@
   import {initializeApp} from "firebase/app"
   import {config} from "./fbaseconfig"
   import {getFirestore} from "firebase/firestore"
+  import signin from "./signin.svelte"
   let app = initializeApp(config);
   let db = getFirestore(app);
 
@@ -34,7 +35,8 @@
 <Router routes={{
   '/': Rd,
   '/chat/:group': Chat,
-  "/askpwd": Pwd
+  "/askpwd": Pwd,
+  "/signin": signin
 }}/>
 
 

@@ -61,6 +61,7 @@
     </h2>
     <input type="text" class="pwd" id="pwd" placeholder="Enter Password" />
     <input type="submit" value="Submit" class="pwd subbtn" id="subbtn" on:click={authpwd} />
+    <span class="dhaa">Don't Have an Account, <a href="/#/signin">Create it here</a></span>
   </div>
 </main>
 
@@ -139,6 +140,7 @@
   }
   @import url("https://fonts.googleapis.com/css2?family=Agbalumo&family=Vibur&display=swap");
   main {
+    --wdt-of-pwdbox:467.5px;
     background-color: #0d0d0d;
     height: calc(100% - 150px);
     width: 100%;
@@ -147,14 +149,15 @@
     align-items: center;
     color: white;
     .pwdbox {
-      height: 350px;
-      width: 300px;
+      height: 550px;
+      width: var(--wdt-of-pwdbox);
       border-radius: 20px;
       border: 1px solid #00fbff;
       color: white;
       display: flex;
       flex-direction: column;
       align-items: center !important;
+      background-color: black;
       box-shadow: 0 0 7px #fff, 0 0 10px #fff, 0 0 21px #fff, 0 0 42px #00fbff,
         0 0 82px #00fbff, 0 0 92px #00fbff, 0 0 102px #0fa, 0 0 151px #0fa;
       .pwdtext {
@@ -174,27 +177,44 @@
       }
       .pwd {
         border-radius: 25px;
-        width: 250px;
+        width: calc(calc(var(--wdt-of-pwdbox)*80)/100);
         height: 40px;
         color: white;
         border: 1px solid rgb(0, 251, 255);
         background-color: rgb(38, 41, 41);
         position: absolute;
-        top: 60%;
+        top: 55%;
         left: 50%;
         transform: translate(-50%, -50%);
         box-shadow: 0px 0px 18px #fff, 0px 0px 28px rgb(0, 251, 255),
-          0px 0px 38px rgb(0, 253, 207);
+        0px 0px 38px rgb(0, 253, 207);
         &::placeholder {
           color: rgb(125, 125, 125);
         }
         padding:7px;
       }
       .subbtn{
+        font-family: 'Vibur';
+        font-size: 20px;
+        background-color: black;
         width:100px !important;
-        margin-top:100px;
+        margin-top:185px;
         cursor:pointer;
       }
+      .dhaa{
+        font-family: 'Vibur';
+        font-size: 20px;
+        position: absolute;
+        margin-top: 500px;
+        a{
+          color:rgb(0, 255, 242);
+        }
+      }
+    }
+  }
+  @media only screen and (max-width: 538px) {
+    main {
+      --wdt-of-pwdbox:80%
     }
   }
 </style>

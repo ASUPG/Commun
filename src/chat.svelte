@@ -50,6 +50,7 @@
   let msgamount: number = 0;
   let toshow = false;
   let announcement = "";
+  let gname = "";
   //Asking for PWA installation
   window.addEventListener("beforeinstallprompt", (e) => {
     e.preventDefault();
@@ -90,7 +91,7 @@
           document.getElementById("sidenav").innerHTML += `
         <a class="group bg-slate-800" href="#/chat/${data[key].name}">
           <img src="" id="logo${count_for_showing_images}" class="groupicon" alt="" />
-          <span class="groupname">${data[key].name}</span>
+          <span class="groupname">${data[key].pname}</span>
           </a>
           `;
           getLogo(data[key].logo, count_for_showing_images);
@@ -137,7 +138,7 @@
   let msgRef = collection(db, params.group);
   disableWriting(params.group);
   onSnapshot(msgRef, (snap) => {
-    let x = snap.docs.reverse()
+    let x = snap.docs.reverse();
 
     x.forEach((doc) => {
       if (username.split("name=")[1] != doc.data().sender) {
@@ -172,7 +173,7 @@
         msg = [];
         let colRef = collection(db, params.group);
         onSnapshot(colRef, (snap) => {
-          let x = snap.docs.reverse()
+          let x = snap.docs.reverse();
           x.forEach((doc) => {
             if (username.split("name=")[1] != doc.data().sender) {
               html += `<div class="msg">
@@ -218,7 +219,7 @@
   //Fuction to send messages
   async function sendmsg() {
     //@ts-ignore
-    
+
     let msgtosend = document.getElementById("msg").value;
     sendmsgwtype("Text", "", msgtosend);
   }
@@ -230,7 +231,7 @@
       let month = date.getMonth() + 1;
       let year = date.getFullYear();
       // @ts-ignore
-      let msgid = 99999999999999 - msgamount
+      let msgid = 99999999999999 - msgamount;
       await setDoc(doc(db, params.group, `${msgid}`), {
         msg: msgtosend,
         sender: username.split("name=")[1],
@@ -274,14 +275,14 @@
     }
   };
   //Function to close the send files container
-  function closecntsend () {
+  function closecntsend() {
     document.getElementById("sendovr").style.visibility = "hidden";
     document.getElementById("sendovr").style.transform = "scale(0)";
     issendcontopen = true;
     filetext.innerHTML = "";
-    updperct.innerHTML = "0%"
+    updperct.innerHTML = "0%";
     barpg.style.width = "0%";
-  };
+  }
   //Function that runs on the onchange of input to keep information up-to-date
   function getFiles() {
     let finp = document.getElementById("fileupd");
@@ -293,38 +294,85 @@
   }
   //function to upload the files
   let uploadfile = async () => {
-    let refofmd = doc(db,"metadata","storage")
-    let snapofmd = await getDoc(refofmd)
-    if (snapofmd.exists()){
-      let n = snapofmd.data().total
+    let refofmd = doc(db, "metadata", "storage");
+    let snapofmd = await getDoc(refofmd);
+    if (snapofmd.exists()) {
+      let n = snapofmd.data().total;
       let storageRef = ref(storage, "files/" + n);
       let updtask = uploadBytesResumable(storageRef, fileitem);
-      updtask.on('state_changed', 
-  (snapshot) => {
-    // Observe state change events such as progress, pause, and resume
-    // Get task progress, including the number of bytes uploaded and the total number of bytes to be uploaded
-    let prg = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
-    progress = Math.trunc(prg);
-  }, 
-  (error) => {
-    alert("An error Occured while uploading: " + error.message + "With code of" + error.code + "Caused by " + error.cause)
-  }, 
-  () => {
-    // Handle successful uploads on complete
-    // For instance, get the download URL: https://firebasestorage.googleapis.com/...
-    getDownloadURL(updtask.snapshot.ref).then((url) => {
-       sendmsgwtype(sendcont, url, `<img src="${url}">`);
-
-    });
-    setDoc(refofmd,{
-      total:n+1
-    }) 
-    });
-    }else{
-      alert("A major error has occurd. Please inform the developer of the app")
+      updtask.on(
+        "state_changed",
+        (snapshot) => {
+          // Observe state change events such as progress, pause, and resume
+          // Get task progress, including the number of bytes uploaded and the total number of bytes to be uploaded
+          let prg = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
+          progress = Math.trunc(prg);
+        },
+        (error) => {
+          alert(
+            "An error Occured while uploading: " +
+              error.message +
+              "With code of" +
+              error.code +
+              "Caused by " +
+              error.cause
+          );
+        },
+        () => {
+          // Handle successful uploads on complete
+          // For instance, get the download URL: https://firebasestorage.googleapis.com/...
+          getDownloadURL(updtask.snapshot.ref).then((url) => {
+            sendmsgwtype(sendcont, url, `<img src="${url}">`);
+          });
+          setDoc(refofmd, {
+            total: n + 1,
+          });
+        }
+      );
+    } else {
+      alert("A major error has occurd. Please inform the developer of the app");
     }
   };
+  //Function to Join a group
+  const hasKey = (obj, key) => Object.keys(obj).includes(key);
+  async function join() {
+    let temp;
+    let refofmetadata = doc(db, "metadata", "groups");
+    let docSnap = await getDoc(refofmetadata);
+    if (docSnap.exists()) {
+      if (hasKey(docSnap.data(), gname)) {
+        let mem = docSnap.data()[gname].members;
+        mem.push(splitedCookie[3].split("id=")[1]);
+        temp = docSnap.data();
+        Object.assign(temp[gname].members, mem);
+        await setDoc(refofmetadata, temp);
+      } else {
+        alert("Group does not exist");
+      }
+    } else {
+      alert("A major error has occurd. Please inform the developer of the");
+    }
+  }
+  //Open Join group
+  function openjoin() {
+    alert("Why")
+    document.getElementById("jagovr").style.visibility = "visible"
+    document.getElementById("jagovr").style.transform = "scale(1)"
+  }
 </script>
+
+<div id="jagovr">
+  <div class="sendui" id="jag">
+    <h2>Join A group</h2>
+    <input
+      bind:value={gname}
+      type="text"
+      class="jagfield"
+      placeholder="Enter Group ID"
+    />
+    <button class="jag" on:click={join}>Join</button>
+  </div>
+</div>
 <div class="sendovr" id="sendovr">
   <div class="sendui">
     <div class="grid so2">
@@ -541,7 +589,9 @@
   </div>
   <!-- Side Grouping Menu -->
   <ExtendButton bind:isOpen />
-  <div id="sidenav" class="sidenav h-screen bg-slate-950" />
+  <div id="sidenav" class="sidenav h-screen bg-slate-950">
+    <button class="joinagroup" id="jagg" on:click={openjoin}>Join A Group</button>
+  </div>
   <div class="areaformsg" id="areaformsg">
     <div class="seamsg" id="seamsg">
       <div class="msg"><span class="sender">ChatBot <br /></span>Welcome</div>
@@ -588,6 +638,72 @@
 </chatwindows>
 
 <style lang="scss">
+  #jagovr {
+    visibility: hidden;
+    transform: scale(0);
+    transition: 2s all;
+    height: 100vh;
+    width: 100vw;
+    position: absolute;
+    background-color: rgba(0, 0, 0, 0.306);
+    z-index: 10;
+    display: grid;
+    place-items: center;
+  }
+  #jag {
+    height: 500px;
+    width: 400px;
+    display: flex;
+    flex-direction: column;
+    .jag {
+      width: 30%;
+      font-family: "Vibur";
+      font-size: 25px;
+      padding: 0;
+    }
+    h2 {
+      margin-top: 20px;
+      font-size: 30px;
+      font-family: "Vibur";
+      text-shadow:
+        0px 0px 3px white,
+        0px 0px 15px white,
+        0px 0px 24px white,
+        0px 0px 48px white;
+    }
+    input,
+    button {
+      padding: 10px;
+      margin-top: 35%;
+      height: 40px;
+      width: 80%;
+      border: 1px solid aqua;
+      border-radius: 20px;
+      background-color: black;
+      box-shadow:
+        0px 0px 4px white,
+        0px 0px 12px white,
+        0px 0px 20px white,
+        0px 0px 24px white,
+        0px 0px 46px aqua,
+        0px 0px 72px aqua,
+        0px 0px 20px aqua,
+        0px 0px 40px aqua;
+    }
+  }
+  .joinagroup {
+    width: 100%;
+    height: 50px;
+    background-color: rgb(0, 208, 255);
+    color: white;
+    font-size: 25px;
+    font-family: "Vibur";
+    text-shadow:
+      0px 0px 10px black,
+      0px 0px 20px black,
+      0px 0px 30px black,
+      0px 0px 40px black;
+  }
   .cut {
     margin-top: auto;
     margin-left: auto;
@@ -639,6 +755,10 @@
       font-size: 50px;
     }
   }
+  #sendovr {
+    visibility: hidden;
+    transform: scale(0);
+  }
   .sendovr {
     transition: 2s all;
     height: 100vh;
@@ -648,8 +768,6 @@
     z-index: 10;
     display: grid;
     place-items: center;
-    visibility: hidden;
-    transform: scale(0);
   }
   .linkbtn {
     height: 100%;

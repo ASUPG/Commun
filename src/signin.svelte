@@ -26,6 +26,13 @@
     newid = Response
     let ref = doc(db,'users',newid)
     document.getElementById('askcont').style.display = "block"
+    let cookie = "isLogined=verfor934"
+    document.cookie = cookie;
+    document.cookie += `|name=${nam}`
+    document.cookie += `|id=${Response}`
+    document.cookie += `|`
+    setTimeout(()=>window.location.href = "/#/",5000)
+    
     await setDoc(ref,{
       batch:"",
       name:nam
@@ -39,7 +46,7 @@
   <div class="container-ask" id="askcont">
     <div class="border-ask">
       <div class="box-ask" >
-        <span class="text-ask">{newid}</span>
+        <span class="text-ask"><span class="uidis"> Unique ID is Please note it down</span><br>{newid}</span>
       </div>
     </div>
   </div>
@@ -52,6 +59,9 @@
 </main>
 
 <style lang="scss">
+  .uidis{
+    font-size: 20px;
+  }
   .text-ask {
     color: white;
     font-family: "Vibur", sans-serif;
@@ -175,6 +185,7 @@
       color: #fff;
     }
     .fields {
+      color:white !important;
       margin-top: 100px;
       width: 80%;
       height: 40px;
